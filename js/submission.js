@@ -5,14 +5,18 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 const db = getFirestore();
 const auth = getAuth();
 
+console.log('Firebase initialized');
+
 // Function to handle form submission
 async function handleFormSubmit(event) {
     event.preventDefault();
+    console.log('Form submit event triggered');
+
     const type = document.getElementById('suggestion-type').value;
     const suggestion = document.getElementById('suggestion-text').value;
     const user = auth.currentUser;
 
-    console.log('Submitting suggestion:', type, suggestion);
+    console.log('Form data:', { type, suggestion });
     console.log('Current user:', user);
 
     if (user) {
@@ -29,15 +33,17 @@ async function handleFormSubmit(event) {
             alert('Suggestion submitted successfully!');
             document.getElementById('suggestion-form').reset();
         } catch (e) {
-            console.error('Error adding document: ', e);
+            console.error('Error adding document:', e);
             alert('Error submitting suggestion: ' + e.message);
         }
     } else {
+        console.log('User not signed in');
         alert('You must be signed in to submit a suggestion.');
     }
 }
 
 function updateUIOnAuthStateChange(user) {
+    console.log('Auth state changed:', user);
     const signInBtn = document.getElementById('signin-btn');
     const signOutBtn = document.getElementById('signout-btn');
     const submitSuggestionBtn = document.getElementById('submit-suggestion-btn');
@@ -54,8 +60,10 @@ function updateUIOnAuthStateChange(user) {
 }
 
 document.getElementById('suggestion-form').addEventListener('submit', handleFormSubmit);
+console.log('Form submit handler attached');
 
 onAuthStateChanged(auth, (user) => {
+    console.log('onAuthStateChanged triggered');
     updateUIOnAuthStateChange(user);
     if (!user) {
         alert('Please sign in to submit a suggestion.');
@@ -64,9 +72,12 @@ onAuthStateChanged(auth, (user) => {
 });
 
 document.getElementById('suggestion-form').addEventListener('focus', (event) => {
+    console.log('Form focus event triggered');
     const user = auth.currentUser;
     if (!user) {
         alert('Please sign in to submit a suggestion.');
         window.location.href = "#signin-btn";
     }
 }, true);
+
+console.log('Form focus handler attached');

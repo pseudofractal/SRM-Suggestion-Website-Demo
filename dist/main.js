@@ -16016,10 +16016,11 @@ window.addEventListener("DOMContentLoaded", fetchSuggestions);
 // js/submission.js
 async function handleFormSubmit(event) {
   event.preventDefault();
+  console.log("Form submit event triggered");
   const type = document.getElementById("suggestion-type").value;
   const suggestion = document.getElementById("suggestion-text").value;
   const user = auth5.currentUser;
-  console.log("Submitting suggestion:", type, suggestion);
+  console.log("Form data:", { type, suggestion });
   console.log("Current user:", user);
   if (user) {
     try {
@@ -16035,14 +16036,16 @@ async function handleFormSubmit(event) {
       alert("Suggestion submitted successfully!");
       document.getElementById("suggestion-form").reset();
     } catch (e) {
-      console.error("Error adding document: ", e);
+      console.error("Error adding document:", e);
       alert("Error submitting suggestion: " + e.message);
     }
   } else {
+    console.log("User not signed in");
     alert("You must be signed in to submit a suggestion.");
   }
 }
 var updateUIOnAuthStateChange = function(user) {
+  console.log("Auth state changed:", user);
   const signInBtn = document.getElementById("signin-btn");
   const signOutBtn = document.getElementById("signout-btn");
   const submitSuggestionBtn = document.getElementById("submit-suggestion-btn");
@@ -16058,8 +16061,11 @@ var updateUIOnAuthStateChange = function(user) {
 };
 var db2 = getFirestore();
 var auth5 = getAuth();
+console.log("Firebase initialized");
 document.getElementById("suggestion-form").addEventListener("submit", handleFormSubmit);
+console.log("Form submit handler attached");
 onAuthStateChanged(auth5, (user) => {
+  console.log("onAuthStateChanged triggered");
   updateUIOnAuthStateChange(user);
   if (!user) {
     alert("Please sign in to submit a suggestion.");
@@ -16067,9 +16073,11 @@ onAuthStateChanged(auth5, (user) => {
   }
 });
 document.getElementById("suggestion-form").addEventListener("focus", (event) => {
+  console.log("Form focus event triggered");
   const user = auth5.currentUser;
   if (!user) {
     alert("Please sign in to submit a suggestion.");
     window.location.href = "#signin-btn";
   }
 }, true);
+console.log("Form focus handler attached");
