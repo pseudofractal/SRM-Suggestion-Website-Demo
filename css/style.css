@@ -1,44 +1,4 @@
-.card {
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.icon {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    vertical-align: middle;
-    margin-right: 0.5rem;
-}
-
-.time-icon {
-    background: url('../assets/icons/time.png') no-repeat center center;
-    background-size: contain;
-}
-
-.status-icon {
-    background: url('../assets/icons/checked.png') no-repeat center center;
-    background-size: contain;
-}
-
-.comments-icon {
-    background: url('../assets/icons/comments.png') no-repeat center center;
-    background-size: contain;
-}
-
-.status-under-review {
-    background-color: yellow;
-}
-
-.status-accepted {
-    background-color: green;
-}
-
-.status-rejected {
-    background-color: red;
-}
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
 
 .hidden {
     display: none;
@@ -55,4 +15,43 @@ button:focus {
 
 button:hover {
     background-color: #f0f0f0;
+}
+.suggestion-card {
+    width: 300px;
+    border: 2px solid #f0f0f0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #ffecd2, #fcb69f);
+    padding: 20px;
+    margin: 10px;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+}
+
+.card-header i {
+    margin-right: 10px;
+    color: #ff6f61;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.card-item i {
+    margin-right: 10px;
+    color: #ff6f61;
 }

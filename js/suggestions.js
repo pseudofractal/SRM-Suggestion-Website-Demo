@@ -28,28 +28,56 @@ export async function fetchSuggestions() {
 function displaySuggestions(suggestions) {
     const suggestionContainer = document.querySelector('.grid section');
     suggestions.forEach(suggestion => {
+
+        console.log(suggestion);
+
         const card = document.createElement('div');
-        card.classList.add('card');
+        card.classList.add('suggestion-card');
 
-        const title = document.createElement('p');
-        title.innerHTML = `<strong>${suggestion.suggestion}</strong>`;
-        card.appendChild(title);
+        const cardHeader = document.createElement('div');
+        cardHeader.classList.add('card-header');
+        const typeIcon = document.createElement('i');
+        typeIcon.classList.add('fas', 'fa-utensils');
+        cardHeader.appendChild(typeIcon);
+        const title = document.createElement('span');
+        title.textContent = suggestion.suggestion;
+        cardHeader.appendChild(title);
+        card.appendChild(cardHeader);
 
-        const time = document.createElement('p');
-        time.innerHTML = `<span class="icon time-icon"></span> ${suggestion.time}`;
-        card.appendChild(time);
+        const cardBody = document.createElement('div');
+        cardBody.classList.add('card-body');
 
-        const status = document.createElement('p');
-        status.innerHTML = `<span class="icon status-icon ${suggestion.status}"></span> ${suggestion.status}`;
-        card.appendChild(status);
+        const timeItem = document.createElement('div');
+        timeItem.classList.add('card-item');
+        const timeIcon = document.createElement('i');
+        timeIcon.classList.add('fas', 'fa-clock');
+        timeItem.appendChild(timeIcon);
+        const timeText = document.createElement('span');
+        timeText.textContent = suggestion.time;
+        timeItem.appendChild(timeText);
+        cardBody.appendChild(timeItem);
 
-        const type = document.createElement('p');
-        type.innerHTML = `<span class="icon type-icon"></span> ${suggestion.type}`;
-        card.appendChild(type);
+        const statusItem = document.createElement('div');
+        statusItem.classList.add('card-item');
+        const statusIcon = document.createElement('i');
+        statusIcon.classList.add('fas', 'fa-cog');
+        statusItem.appendChild(statusIcon);
+        const statusText = document.createElement('span');
+        statusText.textContent = suggestion.status;
+        statusItem.appendChild(statusText);
+        cardBody.appendChild(statusItem);
 
-        const resolution = document.createElement('p');
-        resolution.innerHTML = `<span class="icon comments-icon"></span> ${suggestion.resolution}`;
-        card.appendChild(resolution);
+        const resolutionItem = document.createElement('div');
+        resolutionItem.classList.add('card-item');
+        const resolutionIcon = document.createElement('i');
+        resolutionIcon.classList.add('fas', 'fa-comment-dots');
+        resolutionItem.appendChild(resolutionIcon);
+        const resolutionText = document.createElement('span');
+        resolutionText.textContent = suggestion.resolution;
+        resolutionItem.appendChild(resolutionText);
+        cardBody.appendChild(resolutionItem);
+
+        card.appendChild(cardBody);
 
         suggestionContainer.appendChild(card);
     });
