@@ -6095,11 +6095,12 @@ async function signOutUser() {
 var updateUIOnSignIn = function(user) {
   document.getElementById("signin-btn").classList.add("hidden");
   document.getElementById("signout-btn").classList.remove("hidden");
-  console.log("User Details:", user);
+  document.getElementById("submit-suggestion-btn").classList.remove("hidden");
 };
 var updateUIOnSignOut = function() {
   document.getElementById("signin-btn").classList.remove("hidden");
   document.getElementById("signout-btn").classList.add("hidden");
+  document.getElementById("submit-suggestion-btn").classList.add("hidden");
   console.log("UI updated for sign out.");
 };
 var firebaseConfig = {
@@ -8978,6 +8979,9 @@ var __PRIVATE_isNullOrUndefined = function(e) {
 var __PRIVATE_isNegativeZero = function(e) {
   return e === 0 && 1 / e == -1 / 0;
 };
+var isSafeInteger = function(e) {
+  return typeof e == "number" && Number.isInteger(e) && !__PRIVATE_isNegativeZero(e) && e <= Number.MAX_SAFE_INTEGER && e >= Number.MIN_SAFE_INTEGER;
+};
 var __PRIVATE_objectSize = function(e) {
   let t = 0;
   for (const n in e)
@@ -9253,6 +9257,21 @@ var __PRIVATE_deepClone = function(e) {
 };
 var __PRIVATE_isMaxValue = function(e) {
   return (((e.mapValue || {}).fields || {}).__type__ || {}).stringValue === "__max__";
+};
+var __PRIVATE_extractFieldMask = function(e) {
+  const t = [];
+  return forEach(e.fields, (e2, n) => {
+    const r = new FieldPath$1([e2]);
+    if (__PRIVATE_isMapValue(n)) {
+      const e3 = __PRIVATE_extractFieldMask(n.mapValue).fields;
+      if (e3.length === 0)
+        t.push(r);
+      else
+        for (const n2 of e3)
+          t.push(r.child(n2));
+    } else
+      t.push(r);
+  }), new FieldMask(t);
 };
 var __PRIVATE_boundCompareToDocument = function(e, t, n) {
   let r = 0;
@@ -9536,6 +9555,9 @@ var __PRIVATE_toInteger = function(e) {
     integerValue: "" + e
   };
 };
+var toNumber = function(e, t) {
+  return isSafeInteger(t) ? __PRIVATE_toInteger(t) : __PRIVATE_toDouble(e, t);
+};
 var __PRIVATE_applyTransformOperationToLocalView = function(e, t, n) {
   return e instanceof __PRIVATE_ServerTimestampTransform ? function serverTimestamp$1(e2, t2) {
     const n2 = {
@@ -9653,6 +9675,14 @@ var __PRIVATE_mutationApplyToLocalView = function(e, t, n, r) {
     return n2;
   }(e, t, n);
 };
+var __PRIVATE_mutationExtractBaseValue = function(e, t) {
+  let n = null;
+  for (const r of e.fieldTransforms) {
+    const e2 = t.data.field(r.field), i = __PRIVATE_computeTransformOperationBaseValue(r.transform, e2 || null);
+    i != null && (n === null && (n = ObjectValue.empty()), n.set(r.field, i));
+  }
+  return n || null;
+};
 var __PRIVATE_mutationEquals = function(e, t) {
   return e.type === t.type && (!!e.key.isEqual(t.key) && (!!e.precondition.isEqual(t.precondition) && (!!function __PRIVATE_fieldTransformsAreEqual(e2, t2) {
     return e2 === undefined && t2 === undefined || !(!e2 || !t2) && __PRIVATE_arrayEquals(e2, t2, (e3, t3) => __PRIVATE_fieldTransformEquals(e3, t3));
@@ -9683,6 +9713,30 @@ var __PRIVATE_localTransformResults = function(e, t, n) {
     r.set(i.field, __PRIVATE_applyTransformOperationToLocalView(e2, s, t));
   }
   return r;
+};
+var __PRIVATE_isPermanentError = function(e) {
+  switch (e) {
+    default:
+      return fail();
+    case C.CANCELLED:
+    case C.UNKNOWN:
+    case C.DEADLINE_EXCEEDED:
+    case C.RESOURCE_EXHAUSTED:
+    case C.INTERNAL:
+    case C.UNAVAILABLE:
+    case C.UNAUTHENTICATED:
+      return false;
+    case C.INVALID_ARGUMENT:
+    case C.NOT_FOUND:
+    case C.ALREADY_EXISTS:
+    case C.PERMISSION_DENIED:
+    case C.FAILED_PRECONDITION:
+    case C.ABORTED:
+    case C.OUT_OF_RANGE:
+    case C.UNIMPLEMENTED:
+    case C.DATA_LOSS:
+      return true;
+  }
 };
 var __PRIVATE_mapCodeFromRpcCode = function(e) {
   if (e === undefined)
@@ -9760,6 +9814,9 @@ var toTimestamp = function(e, t) {
 var __PRIVATE_toBytes = function(e, t) {
   return e.useProto3Json ? t.toBase64() : t.toUint8Array();
 };
+var __PRIVATE_toVersion = function(e, t) {
+  return toTimestamp(e, t.toTimestamp());
+};
 var __PRIVATE_fromVersion = function(e) {
   return __PRIVATE_hardAssert(!!e), SnapshotVersion.fromTimestamp(function fromTimestamp(e2) {
     const t = __PRIVATE_normalizeTimestamp(e2);
@@ -9778,6 +9835,9 @@ var __PRIVATE_toResourcePath = function(e, t) {
 var __PRIVATE_fromResourceName = function(e) {
   const t = ResourcePath.fromString(e);
   return __PRIVATE_hardAssert(__PRIVATE_isValidResourceName(t)), t;
+};
+var __PRIVATE_toName = function(e, t) {
+  return __PRIVATE_toResourceName(e.databaseId, t.path);
 };
 var fromName = function(e, t) {
   const n = __PRIVATE_fromResourceName(t);
@@ -9799,6 +9859,12 @@ var __PRIVATE_getEncodedDatabaseId = function(e) {
 };
 var __PRIVATE_extractLocalPathFromResourceName = function(e) {
   return __PRIVATE_hardAssert(e.length > 4 && e.get(4) === "documents"), e.popFirst(5);
+};
+var __PRIVATE_toMutationDocument = function(e, t, n) {
+  return {
+    name: __PRIVATE_toName(e, t),
+    fields: n.value.mapValue.fields
+  };
 };
 var __PRIVATE_fromWatchChange = function(e, t) {
   let n;
@@ -9847,6 +9913,69 @@ var __PRIVATE_fromWatchChange = function(e, t) {
     }
   }
   return n;
+};
+var toMutation = function(e, t) {
+  let n;
+  if (t instanceof __PRIVATE_SetMutation)
+    n = {
+      update: __PRIVATE_toMutationDocument(e, t.key, t.value)
+    };
+  else if (t instanceof __PRIVATE_DeleteMutation)
+    n = {
+      delete: __PRIVATE_toName(e, t.key)
+    };
+  else if (t instanceof __PRIVATE_PatchMutation)
+    n = {
+      update: __PRIVATE_toMutationDocument(e, t.key, t.data),
+      updateMask: __PRIVATE_toDocumentMask(t.fieldMask)
+    };
+  else {
+    if (!(t instanceof __PRIVATE_VerifyMutation))
+      return fail();
+    n = {
+      verify: __PRIVATE_toName(e, t.key)
+    };
+  }
+  return t.fieldTransforms.length > 0 && (n.updateTransforms = t.fieldTransforms.map((e2) => function __PRIVATE_toFieldTransform(e3, t2) {
+    const n2 = t2.transform;
+    if (n2 instanceof __PRIVATE_ServerTimestampTransform)
+      return {
+        fieldPath: t2.field.canonicalString(),
+        setToServerValue: "REQUEST_TIME"
+      };
+    if (n2 instanceof __PRIVATE_ArrayUnionTransformOperation)
+      return {
+        fieldPath: t2.field.canonicalString(),
+        appendMissingElements: {
+          values: n2.elements
+        }
+      };
+    if (n2 instanceof __PRIVATE_ArrayRemoveTransformOperation)
+      return {
+        fieldPath: t2.field.canonicalString(),
+        removeAllFromArray: {
+          values: n2.elements
+        }
+      };
+    if (n2 instanceof __PRIVATE_NumericIncrementTransformOperation)
+      return {
+        fieldPath: t2.field.canonicalString(),
+        increment: n2.Pe
+      };
+    throw fail();
+  }(0, e2))), t.precondition.isNone || (n.currentDocument = function __PRIVATE_toPrecondition(e2, t2) {
+    return t2.updateTime !== undefined ? {
+      updateTime: __PRIVATE_toVersion(e2, t2.updateTime)
+    } : t2.exists !== undefined ? {
+      exists: t2.exists
+    } : fail();
+  }(e, t.precondition)), n;
+};
+var __PRIVATE_fromWriteResults = function(e, t) {
+  return e && e.length > 0 ? (__PRIVATE_hardAssert(t !== undefined), e.map((e2) => function __PRIVATE_fromWriteResult(e3, t2) {
+    let n = e3.updateTime ? __PRIVATE_fromVersion(e3.updateTime) : __PRIVATE_fromVersion(t2);
+    return n.isEqual(SnapshotVersion.min()) && (n = __PRIVATE_fromVersion(t2)), new MutationResult(n, e3.transformResults || []);
+  }(e2, t))) : [];
 };
 var __PRIVATE_toDocumentsTarget = function(e, t) {
   return {
@@ -10098,6 +10227,12 @@ var __PRIVATE_toFilter = function(e) {
     };
   }(e) : fail();
 };
+var __PRIVATE_toDocumentMask = function(e) {
+  const t = [];
+  return e.fields.forEach((e2) => t.push(e2.canonicalString())), {
+    fieldPaths: t
+  };
+};
 var __PRIVATE_isValidResourceName = function(e) {
   return e.length >= 4 && e.get(0) === "projects" && e.get(2) === "databases";
 };
@@ -10136,6 +10271,30 @@ async function __PRIVATE_localStoreHandleUserChange(e, t) {
     });
   });
 }
+var __PRIVATE_localStoreAcknowledgeBatch = function(e, t) {
+  const n = __PRIVATE_debugCast(e);
+  return n.persistence.runTransaction("Acknowledge batch", "readwrite-primary", (e2) => {
+    const r = t.batch.keys(), i = n.os.newChangeBuffer({
+      trackRemovals: true
+    });
+    return function __PRIVATE_applyWriteToRemoteDocuments(e3, t2, n2, r2) {
+      const i2 = n2.batch, s = i2.keys();
+      let o = PersistencePromise.resolve();
+      return s.forEach((e4) => {
+        o = o.next(() => r2.getEntry(t2, e4)).next((t3) => {
+          const s2 = n2.docVersions.get(e4);
+          __PRIVATE_hardAssert(s2 !== null), t3.version.compareTo(s2) < 0 && (i2.applyToRemoteDocument(t3, n2), t3.isValidDocument() && (t3.setReadTime(n2.commitVersion), r2.addEntry(t3)));
+        });
+      }), o.next(() => e3.mutationQueue.removeMutationBatch(t2, i2));
+    }(n, e2, t, i).next(() => i.apply(e2)).next(() => n.mutationQueue.performConsistencyCheck(e2)).next(() => n.documentOverlayCache.removeOverlaysForBatchId(e2, r, t.batch.batchId)).next(() => n.localDocuments.recalculateAndSaveOverlaysForDocumentKeys(e2, function __PRIVATE_getKeysWithTransformResults(e3) {
+      let t2 = __PRIVATE_documentKeySet();
+      for (let n2 = 0;n2 < e3.mutationResults.length; ++n2) {
+        e3.mutationResults[n2].transformResults.length > 0 && (t2 = t2.add(e3.batch.mutations[n2].key));
+      }
+      return t2;
+    }(t))).next(() => n.localDocuments.getDocuments(e2, r));
+  });
+};
 var __PRIVATE_localStoreGetLastRemoteSnapshotVersion = function(e) {
   const t = __PRIVATE_debugCast(e);
   return t.persistence.runTransaction("Get last remote snapshot version", "readonly", (e2) => t.Qr.getLastRemoteSnapshotVersion(e2));
@@ -10187,6 +10346,10 @@ var __PRIVATE_populateDocumentChangeBuffer = function(e, t, n) {
       ls: i
     };
   });
+};
+var __PRIVATE_localStoreGetNextMutationBatch = function(e, t) {
+  const n = __PRIVATE_debugCast(e);
+  return n.persistence.runTransaction("Get next mutation batch", "readonly", (e2) => (t === undefined && (t = -1), n.mutationQueue.getNextMutationBatchAfterBatchId(e2, t)));
 };
 var __PRIVATE_localStoreAllocateTarget = function(e, t) {
   const n = __PRIVATE_debugCast(e);
@@ -10337,6 +10500,61 @@ async function __PRIVATE_disableNetworkUntilRecovery(e, t, n) {
     __PRIVATE_logDebug("RemoteStore", "Retrying IndexedDB access"), await n(), e.M_.delete(1), await __PRIVATE_enableNetworkInternal(e);
   });
 }
+var __PRIVATE_executeWithRecovery = function(e, t) {
+  return t().catch((n) => __PRIVATE_disableNetworkUntilRecovery(e, n, t));
+};
+async function __PRIVATE_fillWritePipeline(e) {
+  const t = __PRIVATE_debugCast(e), n = __PRIVATE_ensureWriteStream(t);
+  let r = t.v_.length > 0 ? t.v_[t.v_.length - 1].batchId : -1;
+  for (;__PRIVATE_canAddToWritePipeline(t); )
+    try {
+      const e2 = await __PRIVATE_localStoreGetNextMutationBatch(t.localStore, r);
+      if (e2 === null) {
+        t.v_.length === 0 && n.n_();
+        break;
+      }
+      r = e2.batchId, __PRIVATE_addToWritePipeline(t, e2);
+    } catch (e2) {
+      await __PRIVATE_disableNetworkUntilRecovery(t, e2);
+    }
+  __PRIVATE_shouldStartWriteStream(t) && __PRIVATE_startWriteStream(t);
+}
+var __PRIVATE_canAddToWritePipeline = function(e) {
+  return __PRIVATE_canUseNetwork(e) && e.v_.length < 10;
+};
+var __PRIVATE_addToWritePipeline = function(e, t) {
+  e.v_.push(t);
+  const n = __PRIVATE_ensureWriteStream(e);
+  n.Xo() && n.E_ && n.d_(t.mutations);
+};
+var __PRIVATE_shouldStartWriteStream = function(e) {
+  return __PRIVATE_canUseNetwork(e) && !__PRIVATE_ensureWriteStream(e).Zo() && e.v_.length > 0;
+};
+var __PRIVATE_startWriteStream = function(e) {
+  __PRIVATE_ensureWriteStream(e).start();
+};
+async function __PRIVATE_onWriteStreamOpen(e) {
+  __PRIVATE_ensureWriteStream(e).V_();
+}
+async function __PRIVATE_onWriteHandshakeComplete(e) {
+  const t = __PRIVATE_ensureWriteStream(e);
+  for (const n of e.v_)
+    t.d_(n.mutations);
+}
+async function __PRIVATE_onMutationResult(e, t, n) {
+  const r = e.v_.shift(), i = MutationBatchResult.from(r, t, n);
+  await __PRIVATE_executeWithRecovery(e, () => e.remoteSyncer.applySuccessfulWrite(i)), await __PRIVATE_fillWritePipeline(e);
+}
+async function __PRIVATE_onWriteStreamClose(e, t) {
+  t && __PRIVATE_ensureWriteStream(e).E_ && await async function __PRIVATE_handleWriteError(e2, t2) {
+    if (function __PRIVATE_isPermanentWriteError(e3) {
+      return __PRIVATE_isPermanentError(e3) && e3 !== C.ABORTED;
+    }(t2.code)) {
+      const n = e2.v_.shift();
+      __PRIVATE_ensureWriteStream(e2).t_(), await __PRIVATE_executeWithRecovery(e2, () => e2.remoteSyncer.rejectFailedWrite(n.batchId, t2)), await __PRIVATE_fillWritePipeline(e2);
+    }
+  }(e, t), __PRIVATE_shouldStartWriteStream(e) && __PRIVATE_startWriteStream(e);
+}
 async function __PRIVATE_remoteStoreHandleCredentialChange(e, t) {
   const n = __PRIVATE_debugCast(e);
   n.asyncQueue.verifyOperationInProgress(), __PRIVATE_logDebug("RemoteStore", "RemoteStore received new credentials");
@@ -10359,6 +10577,20 @@ var __PRIVATE_ensureWatchStream = function(e) {
   }), e.x_.push(async (t) => {
     t ? (e.B_.t_(), __PRIVATE_shouldStartWatchStream(e) ? __PRIVATE_startWatchStream(e) : e.N_.set("Unknown")) : (await e.B_.stop(), __PRIVATE_cleanUpWatchStreamState(e));
   })), e.B_;
+};
+var __PRIVATE_ensureWriteStream = function(e) {
+  return e.k_ || (e.k_ = function __PRIVATE_newPersistentWriteStream(e2, t, n) {
+    const r = __PRIVATE_debugCast(e2);
+    return r.f_(), new __PRIVATE_PersistentWriteStream(t, r.connection, r.authCredentials, r.appCheckCredentials, r.serializer, n);
+  }(e.datastore, e.asyncQueue, {
+    Po: () => Promise.resolve(),
+    To: __PRIVATE_onWriteStreamOpen.bind(null, e),
+    Ao: __PRIVATE_onWriteStreamClose.bind(null, e),
+    R_: __PRIVATE_onWriteHandshakeComplete.bind(null, e),
+    A_: __PRIVATE_onMutationResult.bind(null, e)
+  }), e.x_.push(async (t) => {
+    t ? (e.k_.t_(), await __PRIVATE_fillWritePipeline(e)) : (await e.k_.stop(), e.v_.length > 0 && (__PRIVATE_logDebug("RemoteStore", `Stopping write stream with ${e.v_.length} pending writes`), e.v_ = []));
+  })), e.k_;
 };
 var __PRIVATE_wrapInUserErrorIfRecoverable = function(e, t) {
   if (__PRIVATE_logError("AsyncQueue", `${t}: ${e}`), __PRIVATE_isIndexedDbTransactionError(e))
@@ -10477,6 +10709,46 @@ async function __PRIVATE_triggerRemoteStoreUnlisten(e, t) {
   const n = __PRIVATE_debugCast(e), r = n.ba.get(t), i = n.Da.get(r.targetId);
   n.isPrimaryClient && i.length === 1 && (n.sharedClientState.removeLocalQueryTarget(r.targetId), __PRIVATE_remoteStoreUnlisten(n.remoteStore, r.targetId));
 }
+async function __PRIVATE_syncEngineWrite(e, t, n) {
+  const r = __PRIVATE_syncEngineEnsureWriteCallbacks(e);
+  try {
+    const e2 = await function __PRIVATE_localStoreWriteLocally(e3, t2) {
+      const n2 = __PRIVATE_debugCast(e3), r2 = Timestamp.now(), i = t2.reduce((e4, t3) => e4.add(t3.key), __PRIVATE_documentKeySet());
+      let s, o;
+      return n2.persistence.runTransaction("Locally write mutations", "readwrite", (e4) => {
+        let _ = __PRIVATE_mutableDocumentMap(), a = __PRIVATE_documentKeySet();
+        return n2.os.getEntries(e4, i).next((e5) => {
+          _ = e5, _.forEach((e6, t3) => {
+            t3.isValidDocument() || (a = a.add(e6));
+          });
+        }).next(() => n2.localDocuments.getOverlayedDocuments(e4, _)).next((i2) => {
+          s = i2;
+          const o2 = [];
+          for (const e5 of t2) {
+            const t3 = __PRIVATE_mutationExtractBaseValue(e5, s.get(e5.key).overlayedDocument);
+            t3 != null && o2.push(new __PRIVATE_PatchMutation(e5.key, t3, __PRIVATE_extractFieldMask(t3.value.mapValue), Precondition.exists(true)));
+          }
+          return n2.mutationQueue.addMutationBatch(e4, r2, o2, t2);
+        }).next((t3) => {
+          o = t3;
+          const r3 = t3.applyToLocalDocumentSet(s, a);
+          return n2.documentOverlayCache.saveOverlays(e4, t3.batchId, r3);
+        });
+      }).then(() => ({
+        batchId: o.batchId,
+        changes: __PRIVATE_convertOverlayedDocumentMapToDocumentMap(s)
+      }));
+    }(r.localStore, t);
+    r.sharedClientState.addPendingMutation(e2.batchId), function __PRIVATE_addMutationCallback(e3, t2, n2) {
+      let r2 = e3.xa[e3.currentUser.toKey()];
+      r2 || (r2 = new SortedMap(__PRIVATE_primitiveComparator));
+      r2 = r2.insert(t2, n2), e3.xa[e3.currentUser.toKey()] = r2;
+    }(r, e2.batchId, n), await __PRIVATE_syncEngineEmitNewSnapsAndNotifyLocalStore(r, e2.changes), await __PRIVATE_fillWritePipeline(r.remoteStore);
+  } catch (e2) {
+    const t2 = __PRIVATE_wrapInUserErrorIfRecoverable(e2, "Failed to persist write");
+    n.reject(t2);
+  }
+}
 async function __PRIVATE_syncEngineApplyRemoteEvent(e, t) {
   const n = __PRIVATE_debugCast(e);
   try {
@@ -10519,6 +10791,43 @@ async function __PRIVATE_syncEngineRejectListen(e, t, n) {
   } else
     await __PRIVATE_localStoreReleaseTarget(r.localStore, t, false).then(() => __PRIVATE_removeAndCleanupTarget(r, t, n)).catch(__PRIVATE_ignoreIfPrimaryLeaseLoss);
 }
+async function __PRIVATE_syncEngineApplySuccessfulWrite(e, t) {
+  const n = __PRIVATE_debugCast(e), r = t.batch.batchId;
+  try {
+    const e2 = await __PRIVATE_localStoreAcknowledgeBatch(n.localStore, t);
+    __PRIVATE_processUserCallback(n, r, null), __PRIVATE_triggerPendingWritesCallbacks(n, r), n.sharedClientState.updateMutationState(r, "acknowledged"), await __PRIVATE_syncEngineEmitNewSnapsAndNotifyLocalStore(n, e2);
+  } catch (e2) {
+    await __PRIVATE_ignoreIfPrimaryLeaseLoss(e2);
+  }
+}
+async function __PRIVATE_syncEngineRejectFailedWrite(e, t, n) {
+  const r = __PRIVATE_debugCast(e);
+  try {
+    const e2 = await function __PRIVATE_localStoreRejectBatch(e3, t2) {
+      const n2 = __PRIVATE_debugCast(e3);
+      return n2.persistence.runTransaction("Reject batch", "readwrite-primary", (e4) => {
+        let r2;
+        return n2.mutationQueue.lookupMutationBatch(e4, t2).next((t3) => (__PRIVATE_hardAssert(t3 !== null), r2 = t3.keys(), n2.mutationQueue.removeMutationBatch(e4, t3))).next(() => n2.mutationQueue.performConsistencyCheck(e4)).next(() => n2.documentOverlayCache.removeOverlaysForBatchId(e4, r2, t2)).next(() => n2.localDocuments.recalculateAndSaveOverlaysForDocumentKeys(e4, r2)).next(() => n2.localDocuments.getDocuments(e4, r2));
+      });
+    }(r.localStore, t);
+    __PRIVATE_processUserCallback(r, t, n), __PRIVATE_triggerPendingWritesCallbacks(r, t), r.sharedClientState.updateMutationState(t, "rejected", n), await __PRIVATE_syncEngineEmitNewSnapsAndNotifyLocalStore(r, e2);
+  } catch (n2) {
+    await __PRIVATE_ignoreIfPrimaryLeaseLoss(n2);
+  }
+}
+var __PRIVATE_triggerPendingWritesCallbacks = function(e, t) {
+  (e.Oa.get(t) || []).forEach((e2) => {
+    e2.resolve();
+  }), e.Oa.delete(t);
+};
+var __PRIVATE_processUserCallback = function(e, t, n) {
+  const r = __PRIVATE_debugCast(e);
+  let i = r.xa[r.currentUser.toKey()];
+  if (i) {
+    const e2 = i.get(t);
+    e2 && (n ? e2.reject(n) : e2.resolve(), i = i.remove(t)), r.xa[r.currentUser.toKey()] = i;
+  }
+};
 var __PRIVATE_removeAndCleanupTarget = function(e, t, n = null) {
   e.sharedClientState.removeLocalQueryTarget(t);
   for (const r of e.Da.get(t))
@@ -10622,6 +10931,10 @@ var __PRIVATE_ensureWatchCallbacks = function(e) {
   const t = __PRIVATE_debugCast(e);
   return t.remoteStore.remoteSyncer.applyRemoteEvent = __PRIVATE_syncEngineApplyRemoteEvent.bind(null, t), t.remoteStore.remoteSyncer.getRemoteKeysForTarget = __PRIVATE_syncEngineGetRemoteKeysForTarget.bind(null, t), t.remoteStore.remoteSyncer.rejectListen = __PRIVATE_syncEngineRejectListen.bind(null, t), t.Sa.h_ = __PRIVATE_eventManagerOnWatchChange.bind(null, t.eventManager), t.Sa.ka = __PRIVATE_eventManagerOnWatchError.bind(null, t.eventManager), t;
 };
+var __PRIVATE_syncEngineEnsureWriteCallbacks = function(e) {
+  const t = __PRIVATE_debugCast(e);
+  return t.remoteStore.remoteSyncer.applySuccessfulWrite = __PRIVATE_syncEngineApplySuccessfulWrite.bind(null, t), t.remoteStore.remoteSyncer.rejectFailedWrite = __PRIVATE_syncEngineRejectFailedWrite.bind(null, t), t;
+};
 async function __PRIVATE_setOfflineComponentProvider(e, t) {
   e.asyncQueue.verifyOperationInProgress(), __PRIVATE_logDebug("FirestoreClient", "Initializing OfflineComponentProvider");
   const n = e.configuration;
@@ -10658,6 +10971,9 @@ async function __PRIVATE_ensureOfflineComponents(e) {
 async function __PRIVATE_ensureOnlineComponents(e) {
   return e._onlineComponents || (e._uninitializedComponentsProvider ? (__PRIVATE_logDebug("FirestoreClient", "Using user provided OnlineComponentProvider"), await __PRIVATE_setOnlineComponentProvider(e, e._uninitializedComponentsProvider._online)) : (__PRIVATE_logDebug("FirestoreClient", "Using default OnlineComponentProvider"), await __PRIVATE_setOnlineComponentProvider(e, new OnlineComponentProvider))), e._onlineComponents;
 }
+var __PRIVATE_getSyncEngine = function(e) {
+  return __PRIVATE_ensureOnlineComponents(e).then((e2) => e2.syncEngine);
+};
 async function __PRIVATE_getEventManager(e) {
   const t = await __PRIVATE_ensureOnlineComponents(e), n = t.eventManager;
   return n.onListen = __PRIVATE_syncEngineListen.bind(null, t.syncEngine), n.onUnlisten = __PRIVATE_syncEngineUnlisten.bind(null, t.syncEngine), n.onFirstRemoteStoreListen = __PRIVATE_triggerRemoteStoreListen.bind(null, t.syncEngine), n.onLastRemoteStoreUnlisten = __PRIVATE_triggerRemoteStoreUnlisten.bind(null, t.syncEngine), n;
@@ -10688,6 +11004,10 @@ var __PRIVATE_validateNonEmptyArgument = function(e, t, n) {
 var __PRIVATE_validateIsNotUsedTogether = function(e, t, n, r) {
   if (t === true && r === true)
     throw new FirestoreError(C.INVALID_ARGUMENT, `${e} and ${n} cannot be used together.`);
+};
+var __PRIVATE_validateDocumentPath = function(e) {
+  if (!DocumentKey.isDocumentKey(e))
+    throw new FirestoreError(C.INVALID_ARGUMENT, `Invalid document reference. Document references must have an even number of segments, but ${e} has ${e.length}.`);
 };
 var __PRIVATE_validateCollectionPath = function(e) {
   if (DocumentKey.isDocumentKey(e))
@@ -10759,6 +11079,18 @@ var collection = function(e, t, ...n) {
     return __PRIVATE_validateCollectionPath(r), new CollectionReference(e.firestore, null, r);
   }
 };
+var doc = function(e, t, ...n) {
+  if (e = getModularInstance(e), arguments.length === 1 && (t = __PRIVATE_AutoId.newId()), __PRIVATE_validateNonEmptyArgument("doc", "path", t), e instanceof Firestore$1) {
+    const r = ResourcePath.fromString(t, ...n);
+    return __PRIVATE_validateDocumentPath(r), new DocumentReference(e, null, new DocumentKey(r));
+  }
+  {
+    if (!(e instanceof DocumentReference || e instanceof CollectionReference))
+      throw new FirestoreError(C.INVALID_ARGUMENT, "Expected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore");
+    const r = e._path.child(ResourcePath.fromString(t, ...n));
+    return __PRIVATE_validateDocumentPath(r), new DocumentReference(e.firestore, e instanceof CollectionReference ? e.converter : null, new DocumentKey(r));
+  }
+};
 var getFirestore = function(t, n) {
   const r = typeof t == "object" ? t : getApp(), i = typeof t == "string" ? t : n || "(default)", s = _getProvider(r, "firestore").getImmediate({
     identifier: i
@@ -10783,6 +11115,154 @@ var __PRIVATE_configureFirestore = function(e) {
     _online: i.localCache._onlineComponentProvider
   });
 };
+var __PRIVATE_isWrite = function(e) {
+  switch (e) {
+    case 0:
+    case 2:
+    case 1:
+      return true;
+    case 3:
+    case 4:
+      return false;
+    default:
+      throw fail();
+  }
+};
+var __PRIVATE_newUserDataReader = function(e) {
+  const t = e._freezeSettings(), n = __PRIVATE_newSerializer(e._databaseId);
+  return new __PRIVATE_UserDataReader(e._databaseId, !!t.ignoreUndefinedProperties, n);
+};
+var __PRIVATE_parseSetData = function(e, t, n, r, i, s = {}) {
+  const o = e.Fu(s.merge || s.mergeFields ? 2 : 0, t, n, i);
+  __PRIVATE_validatePlainObject("Data must be an object, but it was:", o, r);
+  const _ = __PRIVATE_parseObject(r, o);
+  let a, u;
+  if (s.merge)
+    a = new FieldMask(o.fieldMask), u = o.fieldTransforms;
+  else if (s.mergeFields) {
+    const e2 = [];
+    for (const r2 of s.mergeFields) {
+      const i2 = __PRIVATE_fieldPathFromArgument$1(t, r2, n);
+      if (!o.contains(i2))
+        throw new FirestoreError(C.INVALID_ARGUMENT, `Field '${i2}' is specified in your field mask but missing from your input data.`);
+      __PRIVATE_fieldMaskContains(e2, i2) || e2.push(i2);
+    }
+    a = new FieldMask(e2), u = o.fieldTransforms.filter((e3) => a.covers(e3.field));
+  } else
+    a = null, u = o.fieldTransforms;
+  return new ParsedSetData(new ObjectValue(_), a, u);
+};
+var __PRIVATE_parseData = function(e, t) {
+  if (__PRIVATE_looksLikeJsonObject(e = getModularInstance(e)))
+    return __PRIVATE_validatePlainObject("Unsupported field value:", t, e), __PRIVATE_parseObject(e, t);
+  if (e instanceof FieldValue)
+    return function __PRIVATE_parseSentinelFieldValue(e2, t2) {
+      if (!__PRIVATE_isWrite(t2.fu))
+        throw t2.Du(`${e2._methodName}() can only be used with update() and set()`);
+      if (!t2.path)
+        throw t2.Du(`${e2._methodName}() is not currently supported inside arrays`);
+      const n = e2._toFieldTransform(t2);
+      n && t2.fieldTransforms.push(n);
+    }(e, t), null;
+  if (e === undefined && t.ignoreUndefinedProperties)
+    return null;
+  if (t.path && t.fieldMask.push(t.path), e instanceof Array) {
+    if (t.settings.yu && t.fu !== 4)
+      throw t.Du("Nested arrays are not supported");
+    return function __PRIVATE_parseArray(e2, t2) {
+      const n = [];
+      let r = 0;
+      for (const i of e2) {
+        let e3 = __PRIVATE_parseData(i, t2.bu(r));
+        e3 == null && (e3 = {
+          nullValue: "NULL_VALUE"
+        }), n.push(e3), r++;
+      }
+      return {
+        arrayValue: {
+          values: n
+        }
+      };
+    }(e, t);
+  }
+  return function __PRIVATE_parseScalarValue(e2, t2) {
+    if ((e2 = getModularInstance(e2)) === null)
+      return {
+        nullValue: "NULL_VALUE"
+      };
+    if (typeof e2 == "number")
+      return toNumber(t2.serializer, e2);
+    if (typeof e2 == "boolean")
+      return {
+        booleanValue: e2
+      };
+    if (typeof e2 == "string")
+      return {
+        stringValue: e2
+      };
+    if (e2 instanceof Date) {
+      const n = Timestamp.fromDate(e2);
+      return {
+        timestampValue: toTimestamp(t2.serializer, n)
+      };
+    }
+    if (e2 instanceof Timestamp) {
+      const n = new Timestamp(e2.seconds, 1000 * Math.floor(e2.nanoseconds / 1000));
+      return {
+        timestampValue: toTimestamp(t2.serializer, n)
+      };
+    }
+    if (e2 instanceof GeoPoint)
+      return {
+        geoPointValue: {
+          latitude: e2.latitude,
+          longitude: e2.longitude
+        }
+      };
+    if (e2 instanceof Bytes)
+      return {
+        bytesValue: __PRIVATE_toBytes(t2.serializer, e2._byteString)
+      };
+    if (e2 instanceof DocumentReference) {
+      const n = t2.databaseId, r = e2.firestore._databaseId;
+      if (!r.isEqual(n))
+        throw t2.Du(`Document reference is for database ${r.projectId}/${r.database} but should be for database ${n.projectId}/${n.database}`);
+      return {
+        referenceValue: __PRIVATE_toResourceName(e2.firestore._databaseId || t2.databaseId, e2._key.path)
+      };
+    }
+    throw t2.Du(`Unsupported field value: ${__PRIVATE_valueDescription(e2)}`);
+  }(e, t);
+};
+var __PRIVATE_parseObject = function(e, t) {
+  const n = {};
+  return isEmpty2(e) ? t.path && t.path.length > 0 && t.fieldMask.push(t.path) : forEach(e, (e2, r) => {
+    const i = __PRIVATE_parseData(r, t.pu(e2));
+    i != null && (n[e2] = i);
+  }), {
+    mapValue: {
+      fields: n
+    }
+  };
+};
+var __PRIVATE_looksLikeJsonObject = function(e) {
+  return !(typeof e != "object" || e === null || e instanceof Array || e instanceof Date || e instanceof Timestamp || e instanceof GeoPoint || e instanceof Bytes || e instanceof DocumentReference || e instanceof FieldValue);
+};
+var __PRIVATE_validatePlainObject = function(e, t, n) {
+  if (!__PRIVATE_looksLikeJsonObject(n) || !function __PRIVATE_isPlainObject(e2) {
+    return typeof e2 == "object" && e2 !== null && (Object.getPrototypeOf(e2) === Object.prototype || Object.getPrototypeOf(e2) === null);
+  }(n)) {
+    const r = __PRIVATE_valueDescription(n);
+    throw r === "an object" ? t.Du(e + " a custom object") : t.Du(e + " " + r);
+  }
+};
+var __PRIVATE_fieldPathFromArgument$1 = function(e, t, n) {
+  if ((t = getModularInstance(t)) instanceof FieldPath)
+    return t._internalPath;
+  if (typeof t == "string")
+    return __PRIVATE_fieldPathFromDotSeparatedString(e, t);
+  throw __PRIVATE_createError("Field path arguments must be of type string or ", e, false, undefined, n);
+};
 var __PRIVATE_fieldPathFromDotSeparatedString = function(e, t, n) {
   if (t.search(be) >= 0)
     throw __PRIVATE_createError(`Invalid field path (${t}). Paths must not contain '~', '*', '/', '[', or ']'`, e, false, undefined, n);
@@ -10799,12 +11279,19 @@ var __PRIVATE_createError = function(e, t, n, r, i) {
   let a = "";
   return (s || o) && (a += " (found", s && (a += ` in field ${r}`), o && (a += ` in document ${i}`), a += ")"), new FirestoreError(C.INVALID_ARGUMENT, _ + e + a);
 };
+var __PRIVATE_fieldMaskContains = function(e, t) {
+  return e.some((e2) => e2.isEqual(t));
+};
 var __PRIVATE_fieldPathFromArgument = function(e, t) {
   return typeof t == "string" ? __PRIVATE_fieldPathFromDotSeparatedString(e, t) : t instanceof FieldPath ? t._internalPath : t._delegate._internalPath;
 };
 var __PRIVATE_validateHasExplicitOrderByForLimitToLast = function(e) {
   if (e.limitType === "L" && e.explicitOrderBy.length === 0)
     throw new FirestoreError(C.UNIMPLEMENTED, "limitToLast() queries require specifying at least one orderBy() clause");
+};
+var __PRIVATE_applyFirestoreDataConverter = function(e, t, n) {
+  let r;
+  return r = e ? n && (n.merge || n.mergeFields) ? e.toFirestore(t, n) : e.toFirestore(t) : t, r;
 };
 var __PRIVATE_resultChangeType = function(e) {
   switch (e) {
@@ -10823,6 +11310,16 @@ var getDocs = function(e) {
   e = __PRIVATE_cast(e, Query);
   const t = __PRIVATE_cast(e.firestore, Firestore), n = ensureFirestoreConfigured(t), r = new __PRIVATE_ExpUserDataWriter(t);
   return __PRIVATE_validateHasExplicitOrderByForLimitToLast(e._query), __PRIVATE_firestoreClientGetDocumentsViaSnapshotListener(n, e._query).then((n2) => new QuerySnapshot(t, r, e, n2));
+};
+var addDoc = function(e, t) {
+  const n = __PRIVATE_cast(e.firestore, Firestore), r = doc(e), i = __PRIVATE_applyFirestoreDataConverter(e.converter, t);
+  return executeWrite(n, [__PRIVATE_parseSetData(__PRIVATE_newUserDataReader(e.firestore), "addDoc", r._key, i, e.converter !== null, {}).toMutation(r._key, Precondition.exists(false))]).then(() => r);
+};
+var executeWrite = function(e, t) {
+  return function __PRIVATE_firestoreClientWrite(e2, t2) {
+    const n = new __PRIVATE_Deferred;
+    return e2.asyncQueue.enqueueAndForget(async () => __PRIVATE_syncEngineWrite(await __PRIVATE_getSyncEngine(e2), t2, n)), n.promise;
+  }(ensureFirestoreConfigured(e), t);
 };
 var S = "@firebase/firestore";
 
@@ -12311,6 +12808,12 @@ class __PRIVATE_NumericIncrementTransformOperation extends TransformOperation {
     super(), this.serializer = e, this.Pe = t;
   }
 }
+class MutationResult {
+  constructor(e, t) {
+    this.version = e, this.transformResults = t;
+  }
+}
+
 class Precondition {
   constructor(e, t) {
     this.updateTime = e, this.exists = t;
@@ -12361,6 +12864,16 @@ class __PRIVATE_DeleteMutation extends Mutation {
     return null;
   }
 }
+
+class __PRIVATE_VerifyMutation extends Mutation {
+  constructor(e, t) {
+    super(), this.key = e, this.precondition = t, this.type = 3, this.fieldTransforms = [];
+  }
+  getFieldMask() {
+    return null;
+  }
+}
+
 class MutationBatch {
   constructor(e, t, n, r) {
     this.batchId = e, this.localWriteTime = t, this.baseMutations = n, this.mutations = r;
@@ -12398,6 +12911,23 @@ class MutationBatch {
     return this.batchId === e.batchId && __PRIVATE_arrayEquals(this.mutations, e.mutations, (e2, t) => __PRIVATE_mutationEquals(e2, t)) && __PRIVATE_arrayEquals(this.baseMutations, e.baseMutations, (e2, t) => __PRIVATE_mutationEquals(e2, t));
   }
 }
+
+class MutationBatchResult {
+  constructor(e, t, n, r) {
+    this.batch = e, this.commitVersion = t, this.mutationResults = n, this.docVersions = r;
+  }
+  static from(e, t, n) {
+    __PRIVATE_hardAssert(e.mutations.length === n.length);
+    let r = function __PRIVATE_documentVersionMap() {
+      return _e;
+    }();
+    const i = e.mutations;
+    for (let e2 = 0;e2 < i.length; e2++)
+      r = r.insert(i[e2].key, n[e2].version);
+    return new MutationBatchResult(e, t, n, r);
+  }
+}
+
 class Overlay {
   constructor(e, t) {
     this.largestBatchId = e, this.mutation = t;
@@ -14179,6 +14709,44 @@ class __PRIVATE_PersistentListenStream extends __PRIVATE_PersistentStream {
     t.database = __PRIVATE_getEncodedDatabaseId(this.serializer), t.removeTarget = e, this.i_(t);
   }
 }
+
+class __PRIVATE_PersistentWriteStream extends __PRIVATE_PersistentStream {
+  constructor(e, t, n, r, i, s) {
+    super(e, "write_stream_connection_backoff", "write_stream_idle", "health_check_timeout", t, n, r, s), this.serializer = i, this.T_ = false;
+  }
+  get E_() {
+    return this.T_;
+  }
+  start() {
+    this.T_ = false, this.lastStreamToken = undefined, super.start();
+  }
+  __() {
+    this.T_ && this.d_([]);
+  }
+  l_(e, t) {
+    return this.connection.Oo("Write", e, t);
+  }
+  onMessage(e) {
+    if (__PRIVATE_hardAssert(!!e.streamToken), this.lastStreamToken = e.streamToken, this.T_) {
+      this.Yo.reset();
+      const t = __PRIVATE_fromWriteResults(e.writeResults, e.commitTime), n = __PRIVATE_fromVersion(e.commitTime);
+      return this.listener.A_(n, t);
+    }
+    return __PRIVATE_hardAssert(!e.writeResults || e.writeResults.length === 0), this.T_ = true, this.listener.R_();
+  }
+  V_() {
+    const e = {};
+    e.database = __PRIVATE_getEncodedDatabaseId(this.serializer), this.i_(e);
+  }
+  d_(e) {
+    const t = {
+      streamToken: this.lastStreamToken,
+      writes: e.map((e2) => toMutation(this.serializer, e2))
+    };
+    this.i_(t);
+  }
+}
+
 class __PRIVATE_DatastoreImpl extends class Datastore {
 } {
   constructor(e, t, n, r) {
@@ -15022,6 +15590,13 @@ class FieldPath {
     return this._internalPath.isEqual(e._internalPath);
   }
 }
+
+class FieldValue {
+  constructor(e) {
+    this._methodName = e;
+  }
+}
+
 class GeoPoint {
   constructor(e, t) {
     if (!isFinite(e) || e < -90 || e > 90)
@@ -15047,6 +15622,85 @@ class GeoPoint {
   }
   _compareTo(e) {
     return __PRIVATE_primitiveComparator(this._lat, e._lat) || __PRIVATE_primitiveComparator(this._long, e._long);
+  }
+}
+var Se = /^__.*__$/;
+
+class ParsedSetData {
+  constructor(e, t, n) {
+    this.data = e, this.fieldMask = t, this.fieldTransforms = n;
+  }
+  toMutation(e, t) {
+    return this.fieldMask !== null ? new __PRIVATE_PatchMutation(e, this.data, this.fieldMask, t, this.fieldTransforms) : new __PRIVATE_SetMutation(e, this.data, t, this.fieldTransforms);
+  }
+}
+class __PRIVATE_ParseContextImpl {
+  constructor(e, t, n, r, i, s) {
+    this.settings = e, this.databaseId = t, this.serializer = n, this.ignoreUndefinedProperties = r, i === undefined && this.mu(), this.fieldTransforms = i || [], this.fieldMask = s || [];
+  }
+  get path() {
+    return this.settings.path;
+  }
+  get fu() {
+    return this.settings.fu;
+  }
+  gu(e) {
+    return new __PRIVATE_ParseContextImpl(Object.assign(Object.assign({}, this.settings), e), this.databaseId, this.serializer, this.ignoreUndefinedProperties, this.fieldTransforms, this.fieldMask);
+  }
+  pu(e) {
+    var t;
+    const n = (t = this.path) === null || t === undefined ? undefined : t.child(e), r = this.gu({
+      path: n,
+      yu: false
+    });
+    return r.wu(e), r;
+  }
+  Su(e) {
+    var t;
+    const n = (t = this.path) === null || t === undefined ? undefined : t.child(e), r = this.gu({
+      path: n,
+      yu: false
+    });
+    return r.mu(), r;
+  }
+  bu(e) {
+    return this.gu({
+      path: undefined,
+      yu: true
+    });
+  }
+  Du(e) {
+    return __PRIVATE_createError(e, this.settings.methodName, this.settings.Cu || false, this.path, this.settings.vu);
+  }
+  contains(e) {
+    return this.fieldMask.find((t) => e.isPrefixOf(t)) !== undefined || this.fieldTransforms.find((t) => e.isPrefixOf(t.field)) !== undefined;
+  }
+  mu() {
+    if (this.path)
+      for (let e = 0;e < this.path.length; e++)
+        this.wu(this.path.get(e));
+  }
+  wu(e) {
+    if (e.length === 0)
+      throw this.Du("Document fields must not be empty");
+    if (__PRIVATE_isWrite(this.fu) && Se.test(e))
+      throw this.Du('Document fields cannot begin and end with "__"');
+  }
+}
+
+class __PRIVATE_UserDataReader {
+  constructor(e, t, n) {
+    this.databaseId = e, this.ignoreUndefinedProperties = t, this.serializer = n || __PRIVATE_newSerializer(e);
+  }
+  Fu(e, t, n, r = false) {
+    return new __PRIVATE_ParseContextImpl({
+      fu: e,
+      methodName: t,
+      vu: n,
+      path: FieldPath$1.emptyPath(),
+      yu: false,
+      Cu: r
+    }, this.databaseId, this.serializer, this.ignoreUndefinedProperties);
   }
 }
 var be = new RegExp("[~\\*/\\[\\]]");
@@ -15278,7 +15932,7 @@ async function fetchSuggestions() {
   const suggestionsCol = collection(db, "suggestions");
   try {
     const suggestionSnapshot = await getDocs(suggestionsCol);
-    const suggestionList = suggestionSnapshot.docs.map((doc) => doc.data());
+    const suggestionList = suggestionSnapshot.docs.map((doc2) => doc2.data());
     displaySuggestions(suggestionList);
   } catch (error) {
     console.error("Error fetching suggestions:", error);
@@ -15355,3 +16009,42 @@ var firebaseConfig2 = {
 var app9 = initializeApp(firebaseConfig2);
 var db = getFirestore(app9);
 window.addEventListener("DOMContentLoaded", fetchSuggestions);
+
+// js/submission.js
+async function handleFormSubmit(event) {
+  event.preventDefault();
+  const type = document.getElementById("suggestion-type").value;
+  const suggestion = document.getElementById("suggestion-text").value;
+  const user = auth5.currentUser;
+  if (user) {
+    try {
+      const docRef = await addDoc(collection(db2, "suggestions"), {
+        type,
+        suggestion,
+        authorId: user.uid,
+        time: Timestamp.now(),
+        status: "processing",
+        resolution: ""
+      });
+      console.log("Document written with ID: ", docRef.id);
+      alert("Suggestion submitted successfully!");
+      document.getElementById("suggestion-form").reset();
+    } catch (e) {
+      console.error("Error adding document: ", e);
+      alert("Error submitting suggestion: " + e.message);
+    }
+  } else {
+    alert("You must be signed in to submit a suggestion.");
+  }
+}
+var checkSignInStatus = function() {
+  const user = auth5.currentUser;
+  if (!user) {
+    alert("Please sign in to submit a suggestion.");
+    window.location.href = "#signin-btn";
+  }
+};
+var db2 = getFirestore();
+var auth5 = getAuth();
+document.getElementById("suggestion-form").addEventListener("submit", handleFormSubmit);
+document.getElementById("suggestion-form").addEventListener("focus", checkSignInStatus, true);

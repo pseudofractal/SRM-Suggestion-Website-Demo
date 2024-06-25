@@ -41,12 +41,13 @@ export async function signOutUser() {
 function updateUIOnSignIn(user) {
     document.getElementById('signin-btn').classList.add('hidden');
     document.getElementById('signout-btn').classList.remove('hidden');
-    console.log('User Details:', user);
+    document.getElementById('submit-suggestion-btn').classList.remove('hidden');
 }
 
 function updateUIOnSignOut() {
     document.getElementById('signin-btn').classList.remove('hidden');
     document.getElementById('signout-btn').classList.add('hidden');
+    document.getElementById('submit-suggestion-btn').classList.add('hidden');
     console.log('UI updated for sign out.');
 }
 

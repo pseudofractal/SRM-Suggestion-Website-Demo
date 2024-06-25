@@ -14,9 +14,9 @@
             <li><strong>SRM Suggestions</strong></li>
         </ul>
         <ul>
-            <li><a href="https://forms.gle/eRUmSuNXjSNhXhb17" role="button">Suggestion Form</a></li>
+            <li id="submit-suggestion-btn" class="hidden"><a href="#submit-suggestion" role="button">Suggestion Form</a></li>
             <li id="signin-btn"><button onclick="signInWithGoogle()" aria-label="Sign in with Google">Sign In with Google</button></li>
-            <li id="signout-btn" style="display:none;"><button onclick="signOutUser()" aria-label="Sign out">Sign Out</button></li>
+            <li id="signout-btn" class="hidden"><button onclick="signOutUser()" aria-label="Sign out">Sign Out</button></li>
         </ul>
     </nav>
 
@@ -29,9 +29,23 @@
                 </hgroup>
                 <p>Below is a list of all suggestions along with their submission times, current consideration status, and any comments regarding the consideration process from SRMC members.</p>
             </section>
+            <section id="submit-suggestion">
+                <hgroup>
+                    <h2>Submit a Suggestion</h2>
+                </hgroup>
+                <form id="suggestion-form">
+                    <label for="suggestion-type">Type</label>
+                    <select id="suggestion-type" name="type" required>
+                        <option value="General">General</option>
+                        <option value="Dish">Dish</option>
+                    </select>
+                    <label for="suggestion-text">Suggestion</label>
+                    <input type="text" id="suggestion-text" name="suggestion" required>
+                    <button type="submit" role="button">Submit</button>
+                </form>
+            </section>
         </div>
     </main>
-    
 
     <footer class="container">
         <h2>Contact Us</h2>
