@@ -15285,9 +15285,9 @@ async function fetchSuggestions() {
   }
 }
 var displaySuggestions = function(suggestions) {
+  console.log(suggestion);
   const suggestionContainer = document.querySelector(".grid section");
-  suggestions.forEach((suggestion) => {
-    console.log(suggestion);
+  suggestions.forEach((suggestion2) => {
     const card = document.createElement("div");
     card.classList.add("suggestion-card");
     const cardHeader = document.createElement("div");
@@ -15296,7 +15296,7 @@ var displaySuggestions = function(suggestions) {
     typeIcon.classList.add("fas", "fa-utensils");
     cardHeader.appendChild(typeIcon);
     const title = document.createElement("span");
-    title.textContent = suggestion.suggestion;
+    title.textContent = suggestion2.suggestion;
     cardHeader.appendChild(title);
     card.appendChild(cardHeader);
     const cardBody = document.createElement("div");
@@ -15307,7 +15307,7 @@ var displaySuggestions = function(suggestions) {
     timeIcon.classList.add("fas", "fa-clock");
     timeItem.appendChild(timeIcon);
     const timeText = document.createElement("span");
-    timeText.textContent = suggestion.time;
+    timeText.textContent = suggestion2.time;
     timeItem.appendChild(timeText);
     cardBody.appendChild(timeItem);
     const statusItem = document.createElement("div");
@@ -15316,7 +15316,7 @@ var displaySuggestions = function(suggestions) {
     statusIcon.classList.add("fas", "fa-cog");
     statusItem.appendChild(statusIcon);
     const statusText = document.createElement("span");
-    statusText.textContent = suggestion.status;
+    statusText.textContent = suggestion2.status;
     statusItem.appendChild(statusText);
     cardBody.appendChild(statusItem);
     const resolutionItem = document.createElement("div");
@@ -15325,7 +15325,7 @@ var displaySuggestions = function(suggestions) {
     resolutionIcon.classList.add("fas", "fa-comment-dots");
     resolutionItem.appendChild(resolutionIcon);
     const resolutionText = document.createElement("span");
-    resolutionText.textContent = suggestion.resolution;
+    resolutionText.textContent = suggestion2.resolution;
     resolutionItem.appendChild(resolutionText);
     cardBody.appendChild(resolutionItem);
     card.appendChild(cardBody);
