@@ -1,5 +1,5 @@
 import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 // Initialize Firebase Firestore and Auth
 const db = getFirestore();
@@ -20,14 +20,13 @@ async function handleFormSubmit(event) {
             const docRef = await addDoc(collection(db, 'suggestions'), {
                 type: type,
                 suggestion: suggestion,
-                authorId: user.uid,
+                email: user.email,
                 time: Timestamp.now(),
                 status: 'processing',
                 resolution: ''
             });
             console.log('Document written with ID: ', docRef.id);
             alert('Suggestion submitted successfully!');
-            // Optionally clear the form
             document.getElementById('suggestion-form').reset();
         } catch (e) {
             console.error('Error adding document: ', e);
@@ -38,17 +37,36 @@ async function handleFormSubmit(event) {
     }
 }
 
-// Check if user is signed in before showing the form
-function checkSignInStatus() {
+function updateUIOnAuthStateChange(user) {
+    const signInBtn = document.getElementById('signin-btn');
+    const signOutBtn = document.getElementById('signout-btn');
+    const submitSuggestionBtn = document.getElementById('submit-suggestion-btn');
+
+    if (user) {
+        signInBtn.classList.add('hidden');
+        signOutBtn.classList.remove('hidden');
+        submitSuggestionBtn.classList.remove('hidden');
+    } else {
+        signInBtn.classList.remove('hidden');
+        signOutBtn.classList.add('hidden');
+        submitSuggestionBtn.classList.add('hidden');
+    }
+}
+
+document.getElementById('suggestion-form').addEventListener('submit', handleFormSubmit);
+
+onAuthStateChanged(auth, (user) => {
+    updateUIOnAuthStateChange(user);
+    if (!user) {
+        alert('Please sign in to submit a suggestion.');
+        window.location.href = "#signin-btn";
+    }
+});
+
+document.getElementById('suggestion-form').addEventListener('focus', (event) => {
     const user = auth.currentUser;
     if (!user) {
         alert('Please sign in to submit a suggestion.');
         window.location.href = "#signin-btn";
     }
-}
-
-// Attach the form submit handler
-document.getElementById('suggestion-form').addEventListener('submit', handleFormSubmit);
-
-// Check sign-in status when trying to access the form
-document.getElementById('suggestion-form').addEventListener('focus', checkSignInStatus, true);
+}, true);

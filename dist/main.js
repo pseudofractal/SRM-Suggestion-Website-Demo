@@ -2430,6 +2430,9 @@ var onIdTokenChanged = function(auth, nextOrObserver, error, completed) {
 var beforeAuthStateChanged = function(auth, callback, onAbort) {
   return getModularInstance(auth).beforeAuthStateChanged(callback, onAbort);
 };
+var onAuthStateChanged = function(auth, nextOrObserver, error, completed) {
+  return getModularInstance(auth).onAuthStateChanged(nextOrObserver, error, completed);
+};
 var signOut = function(auth) {
   return getModularInstance(auth).signOut();
 };
@@ -16023,7 +16026,7 @@ async function handleFormSubmit(event) {
       const docRef = await addDoc(collection(db2, "suggestions"), {
         type,
         suggestion,
-        authorId: user.uid,
+        email: user.email,
         time: Timestamp.now(),
         status: "processing",
         resolution: ""
@@ -16039,14 +16042,34 @@ async function handleFormSubmit(event) {
     alert("You must be signed in to submit a suggestion.");
   }
 }
-var checkSignInStatus = function() {
-  const user = auth5.currentUser;
-  if (!user) {
-    alert("Please sign in to submit a suggestion.");
-    window.location.href = "#signin-btn";
+var updateUIOnAuthStateChange = function(user) {
+  const signInBtn = document.getElementById("signin-btn");
+  const signOutBtn = document.getElementById("signout-btn");
+  const submitSuggestionBtn = document.getElementById("submit-suggestion-btn");
+  if (user) {
+    signInBtn.classList.add("hidden");
+    signOutBtn.classList.remove("hidden");
+    submitSuggestionBtn.classList.remove("hidden");
+  } else {
+    signInBtn.classList.remove("hidden");
+    signOutBtn.classList.add("hidden");
+    submitSuggestionBtn.classList.add("hidden");
   }
 };
 var db2 = getFirestore();
 var auth5 = getAuth();
 document.getElementById("suggestion-form").addEventListener("submit", handleFormSubmit);
-document.getElementById("suggestion-form").addEventListener("focus", checkSignInStatus, true);
+onAuthStateChanged(auth5, (user) => {
+  updateUIOnAuthStateChange(user);
+  if (!user) {
+    alert("Please sign in to submit a suggestion.");
+    window.location.href = "#signin-btn";
+  }
+});
+document.getElementById("suggestion-form").addEventListener("focus", (event) => {
+  const user = auth5.currentUser;
+  if (!user) {
+    alert("Please sign in to submit a suggestion.");
+    window.location.href = "#signin-btn";
+  }
+}, true);

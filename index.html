@@ -21,30 +21,30 @@
     </nav>
 
     <main class="container">
-        <div class="grid">
-            <section>
-                <hgroup>
-                    <h2>Suggestion List</h2>
-                    <h3>A time sorted list of all the suggestions SRMC has received.</h3>
-                </hgroup>
-                <p>Below is a list of all suggestions along with their submission times, current consideration status, and any comments regarding the consideration process from SRMC members.</p>
-            </section>
-            <section id="submit-suggestion">
-                <hgroup>
-                    <h2>Submit a Suggestion</h2>
-                </hgroup>
-                <form id="suggestion-form">
-                    <label for="suggestion-type">Type</label>
-                    <select id="suggestion-type" name="type" required>
-                        <option value="General">General</option>
-                        <option value="Dish">Dish</option>
-                    </select>
-                    <label for="suggestion-text">Suggestion</label>
-                    <input type="text" id="suggestion-text" name="suggestion" required>
-                    <button type="submit" role="button">Submit</button>
-                </form>
-            </section>
-        </div>
+        <section>
+            <hgroup>
+                <h2>Suggestion List</h2>
+                <h3>A time sorted list of all the suggestions SRMC has received.</h3>
+            </hgroup>
+            <p>Below is a list of all suggestions along with their submission times, current consideration status, and any comments regarding the consideration process from SRMC members.</p>
+        </section>
+        
+        <!-- Suggestion Form -->
+        <section id="submit-suggestion">
+            <hgroup>
+                <h2>Submit a Suggestion</h2>
+            </hgroup>
+            <form id="suggestion-form">
+                <label for="suggestion-type">Type</label>
+                <select id="suggestion-type" name="type" required>
+                    <option value="General">General</option>
+                    <option value="Dish">Dish</option>
+                </select>
+                <label for="suggestion-text">Suggestion</label>
+                <input type="text" id="suggestion-text" name="suggestion" required>
+                <button type="submit" role="button">Submit</button>
+            </form>
+        </section>
     </main>
 
     <footer class="container">
