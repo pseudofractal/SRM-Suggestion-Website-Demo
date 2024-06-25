@@ -15292,9 +15292,9 @@ var displaySuggestions = function(suggestions) {
     card.classList.add("suggestion-card");
     const cardHeader = document.createElement("div");
     cardHeader.classList.add("card-header");
-    const typeIcon = document.createElement("i");
-    typeIcon.classList.add("fas", "fa-utensils");
-    cardHeader.appendChild(typeIcon);
+    const headerIcon = document.createElement("i");
+    headerIcon.classList.add("fas", "fa-utensils");
+    cardHeader.appendChild(headerIcon);
     const title = document.createElement("span");
     title.textContent = suggestion.suggestion;
     cardHeader.appendChild(title);
@@ -15318,6 +15318,18 @@ var displaySuggestions = function(suggestions) {
     const statusText = document.createElement("span");
     statusText.textContent = suggestion.status;
     statusItem.appendChild(statusText);
+    const typeIcon = document.createElement("i");
+    if (suggestion.status === "Pending") {
+      typeIcon.classList.add("fas", "fa-exclamation-circle");
+    } else if (suggestion.status === "In Progress") {
+      typeIcon.classList.add("fas", "fa-spinner");
+    } else if (suggestion.status === "Resolved") {
+      typeIcon.classList.add("fas", "fa-check-circle");
+    }
+    statusItem.appendChild(typeIcon);
+    const typeText = document.createElement("span");
+    typeText.textContent = suggestion.type;
+    statusItem.appendChild(typeText);
     cardBody.appendChild(statusItem);
     const resolutionItem = document.createElement("div");
     resolutionItem.classList.add("card-item");
