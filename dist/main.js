@@ -15287,6 +15287,7 @@ async function fetchSuggestions() {
 var displaySuggestions = function(suggestions) {
   const suggestionContainer = document.querySelector(".grid section");
   suggestions.forEach((suggestion) => {
+    console.log(suggestion);
     const card = document.createElement("div");
     card.classList.add("suggestion-card");
     const cardHeader = document.createElement("div");
