@@ -15279,16 +15279,15 @@ async function fetchSuggestions() {
   try {
     const suggestionSnapshot = await getDocs(suggestionsCol);
     const suggestionList = suggestionSnapshot.docs.map((doc) => doc.data());
-    console.log(suggestionList);
     displaySuggestions(suggestionList);
   } catch (error) {
     console.error("Error fetching suggestions:", error);
   }
 }
 var displaySuggestions = function(suggestions) {
-  console.log(suggestion);
   const suggestionContainer = document.querySelector(".grid section");
-  suggestions.forEach((suggestion2) => {
+  suggestions.forEach((suggestion) => {
+    console.log(suggestion);
     const card = document.createElement("div");
     card.classList.add("suggestion-card");
     const cardHeader = document.createElement("div");
@@ -15297,7 +15296,7 @@ var displaySuggestions = function(suggestions) {
     typeIcon.classList.add("fas", "fa-utensils");
     cardHeader.appendChild(typeIcon);
     const title = document.createElement("span");
-    title.textContent = suggestion2.suggestion;
+    title.textContent = suggestion.suggestion;
     cardHeader.appendChild(title);
     card.appendChild(cardHeader);
     const cardBody = document.createElement("div");
@@ -15308,7 +15307,7 @@ var displaySuggestions = function(suggestions) {
     timeIcon.classList.add("fas", "fa-clock");
     timeItem.appendChild(timeIcon);
     const timeText = document.createElement("span");
-    timeText.textContent = suggestion2.time;
+    timeText.textContent = suggestion.time;
     timeItem.appendChild(timeText);
     cardBody.appendChild(timeItem);
     const statusItem = document.createElement("div");
@@ -15317,7 +15316,7 @@ var displaySuggestions = function(suggestions) {
     statusIcon.classList.add("fas", "fa-cog");
     statusItem.appendChild(statusIcon);
     const statusText = document.createElement("span");
-    statusText.textContent = suggestion2.status;
+    statusText.textContent = suggestion.status;
     statusItem.appendChild(statusText);
     cardBody.appendChild(statusItem);
     const resolutionItem = document.createElement("div");
@@ -15326,7 +15325,7 @@ var displaySuggestions = function(suggestions) {
     resolutionIcon.classList.add("fas", "fa-comment-dots");
     resolutionItem.appendChild(resolutionIcon);
     const resolutionText = document.createElement("span");
-    resolutionText.textContent = suggestion2.resolution;
+    resolutionText.textContent = suggestion.resolution;
     resolutionItem.appendChild(resolutionText);
     cardBody.appendChild(resolutionItem);
     card.appendChild(cardBody);

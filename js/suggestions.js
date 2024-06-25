@@ -19,7 +19,6 @@ export async function fetchSuggestions() {
     try {
         const suggestionSnapshot = await getDocs(suggestionsCol);
         const suggestionList = suggestionSnapshot.docs.map(doc => doc.data());
-        console.log(suggestionList);
         displaySuggestions(suggestionList);
     } catch (error) {
         console.error('Error fetching suggestions:', error);
@@ -27,9 +26,9 @@ export async function fetchSuggestions() {
 }
 
 function displaySuggestions(suggestions) {
-    console.log(suggestion);
     const suggestionContainer = document.querySelector('.grid section');
     suggestions.forEach(suggestion => {
+        console.log(suggestion);
         const card = document.createElement('div');
         card.classList.add('suggestion-card');
 
