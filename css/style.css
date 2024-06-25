@@ -1,0 +1,58 @@
+.card {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+
+.time-icon {
+    background: url('../assets/icons/time.png') no-repeat center center;
+    background-size: contain;
+}
+
+.status-icon {
+    background: url('../assets/icons/checked.png') no-repeat center center;
+    background-size: contain;
+}
+
+.comments-icon {
+    background: url('../assets/icons/comments.png') no-repeat center center;
+    background-size: contain;
+}
+
+.status-under-review {
+    background-color: yellow;
+}
+
+.status-accepted {
+    background-color: green;
+}
+
+.status-rejected {
+    background-color: red;
+}
+
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: block;
+}
+
+button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(21, 156, 228, 0.4);
+}
+
+button:hover {
+    background-color: #f0f0f0;
+}
