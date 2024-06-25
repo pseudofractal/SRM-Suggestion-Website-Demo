@@ -1,0 +1,6 @@
+[entries]
+auth = "js/auth.js"
+suggestions = "js/suggestions.js"
+
+[output]
+dir = "dist"

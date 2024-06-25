@@ -1,4 +1,2 @@
-import { signInWithGoogle, signOutUser } from './js/auth.js';
-
-window.signInWithGoogle = signInWithGoogle;
-window.signOutUser = signOutUser;
+import './js/auth.js';
+import './js/suggestions.js';
