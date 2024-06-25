@@ -56,11 +56,19 @@ function displaySuggestions(suggestions) {
         const statusItem = document.createElement('div');
         statusItem.classList.add('card-item');
         const statusIcon = document.createElement('i');
-        statusIcon.classList.add('icon', 'fas', 'fa-cog');
+        statusIcon.classList.add('icon', 'fas', 'fa-info');
         statusItem.appendChild(statusIcon);
         const statusText = document.createElement('span');
         statusText.textContent = suggestion.status;
         statusItem.appendChild(statusText);
+
+        if (suggestion.status === 'processing') {
+            card.classList.add('processing');
+        } else if (suggestion.status === 'completed') {
+            card.classList.add('completed');
+        } else if (suggestion.status === 'rejected') {
+            card.classList.add('rejected');
+        }
         
         const typeIcon = document.createElement('i');
         if (suggestion.type === 'Dish') {

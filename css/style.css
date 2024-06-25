@@ -19,11 +19,23 @@ button:focus {
 button:hover {
     background-color: #cba6f7;
 }
+
+.processing {
+    background: linear-gradient(135deg, #f5e0dc, #f2cdcd);
+}
+
+.completed {
+    background: linear-gradient(135deg, #94e2d5, #89b4fa);
+}
+
+.rejected {
+    background: linear-gradient(135deg, #eba0ac, #f38ba8);
+}
+
 .suggestion-card {
     border: 2px solid #11111b;
     border-radius: 10px;
     box-shadow: 0 4px 8px #89dceb;
-    background: linear-gradient(135deg, #94e2d5, #89b4fa);
     padding: 20px;
     margin: 10px;
     font-family: 'Arial', sans-serif;
