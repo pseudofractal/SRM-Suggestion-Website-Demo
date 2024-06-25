@@ -5,7 +5,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 const db = getFirestore();
 const auth = getAuth();
 
-console.log('Firebase initialized');
+console.log('Firebase initialized from submission.js');
 
 // Function to handle form submission
 async function handleFormSubmit(event) {

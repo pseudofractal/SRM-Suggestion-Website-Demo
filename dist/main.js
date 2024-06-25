@@ -16061,7 +16061,7 @@ var updateUIOnAuthStateChange = function(user) {
 };
 var db2 = getFirestore();
 var auth5 = getAuth();
-console.log("Firebase initialized");
+console.log("Firebase initialized from submission.js");
 document.getElementById("suggestion-form").addEventListener("submit", handleFormSubmit);
 console.log("Form submit handler attached");
 onAuthStateChanged(auth5, (user) => {
