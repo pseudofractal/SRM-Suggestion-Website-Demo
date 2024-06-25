@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
+// Firebase configuration and initialization
 const firebaseConfig = {
     apiKey: "AIzaSyDllOEaNJTcldiOZR6DwNL-VnbbCmDtXB4",
     authDomain: "srm-web-app.firebaseapp.com",
@@ -26,7 +27,7 @@ export async function fetchSuggestions() {
 }
 
 function displaySuggestions(suggestions) {
-    const suggestionContainer = document.querySelector('.grid section');
+    const suggestionContainer = document.querySelector('main > section');
     suggestions.forEach(suggestion => {
         console.log(suggestion);
         const card = document.createElement('div');
@@ -60,11 +61,11 @@ function displaySuggestions(suggestions) {
         const statusText = document.createElement('span');
         statusText.textContent = suggestion.status;
         statusItem.appendChild(statusText);
+        
         const typeIcon = document.createElement('i');
-        if (suggestion.type == 'dish') {
+        if (suggestion.type === 'Dish') {
             typeIcon.classList.add('icon', 'fas', 'fa-utensils');
-        }
-        else if (suggestion.type == 'general') {
+        } else if (suggestion.type === 'General') {
             typeIcon.classList.add('icon', 'fas', 'fa-question');
         }
         statusItem.appendChild(typeIcon);

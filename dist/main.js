@@ -15942,7 +15942,7 @@ async function fetchSuggestions() {
   }
 }
 var displaySuggestions = function(suggestions) {
-  const suggestionContainer = document.querySelector(".grid section");
+  const suggestionContainer = document.querySelector("main > section");
   suggestions.forEach((suggestion) => {
     console.log(suggestion);
     const card = document.createElement("div");
@@ -15973,9 +15973,9 @@ var displaySuggestions = function(suggestions) {
     statusText.textContent = suggestion.status;
     statusItem.appendChild(statusText);
     const typeIcon = document.createElement("i");
-    if (suggestion.type == "dish") {
+    if (suggestion.type === "Dish") {
       typeIcon.classList.add("icon", "fas", "fa-utensils");
-    } else if (suggestion.type == "general") {
+    } else if (suggestion.type === "General") {
       typeIcon.classList.add("icon", "fas", "fa-question");
     }
     statusItem.appendChild(typeIcon);
