@@ -15279,6 +15279,7 @@ async function fetchSuggestions() {
   try {
     const suggestionSnapshot = await getDocs(suggestionsCol);
     const suggestionList = suggestionSnapshot.docs.map((doc) => doc.data());
+    console.log(suggestionList);
     displaySuggestions(suggestionList);
   } catch (error) {
     console.error("Error fetching suggestions:", error);
