@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SRM Suggestions</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        .card {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+        .time-icon {
+            background: url('https://img.icons8.com/ios-glyphs/30/ffffff/time.png') no-repeat center center;
+            background-size: contain;
+        }
+        .status-icon {
+            background: url('https://img.icons8.com/ios-glyphs/30/000000/checked.png') no-repeat center center;
+            background-size: contain;
+        }
+        .status-under-review {
+            background-color: yellow;
+        }
+        .status-accepted {
+            background-color: green;
+        }
+        .status-rejected {
+            background-color: red;
+        }
+        .comments-icon {
+            background: url('https://img.icons8.com/ios-glyphs/30/0000ff/comments.png') no-repeat center center;
+            background-size: contain;
+        }
+    </style>
+</head>
+<body>
+    <nav class="container-fluid">
+        <ul>
+            <li><strong>SRM Suggestions</strong></li>
+        </ul>
+        <ul>
+            <li><a href="https://forms.gle/eRUmSuNXjSNhXhb17" role="button">Suggestion Form</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <div class="grid">
+            <section>
+                <hgroup>
+                    <h2>Suggestion List</h2>
+                    <h3>A time sorted list of all the suggestions SRMC has recieved.</h3>
+                </hgroup>
+                <p>Below is a list of all suggestions along with their submission times, current consideration status, and any comments regarding the consideration process from SRMC members.</p>
+                
+                <div class="card">
+                    <p><strong>Remove Kadhi Pakoda</strong></p>
+                    <p><span class="icon time-icon"></span> 2024-06-25 12:00:00</p>
+                    <p><span class="icon status-icon status-under-review"></span> Under Review</p>
+                    <p><span class="icon comments-icon"></span> Waiting for more opinions.</p>
+                </div>
+                
+                <div class="card">
+                    <p><strong>Reduce Amount of Soyabean</strong></p>
+                    <p><span class="icon time-icon"></span> 2024-06-24 09:30:00</p>
+                    <p><span class="icon status-icon status-accepted"></span> Accepted</p>
+                    <p><span class="icon comments-icon"></span> Implemented in July's menu.</p>
+                </div>
+
+                <div class="card">
+                    <p><strong>Remove all vegetables</strong></p>
+                    <p><span class="icon time-icon"></span> 2024-06-23 14:45:00</p>
+                    <p><span class="icon status-icon status-rejected"></span> Rejected</p>
+                    <p><span class="icon comments-icon"></span> No you.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="container">
+        <h2>Contact Us</h2>
+        <p>For any queries, please contact us using the provided email address.</p>
+        <a href="mailto:studentmess@iisermohali.ac.in">studentmess@iisermohali.ac.in</a>
+    </footer>
+</body>
+</html>
