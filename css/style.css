@@ -57,3 +57,7 @@ button:hover {
     margin-right: 10px;
     color: #11111b;
 }
+
+.icon {
+    padding-left: 10px;
+}

@@ -15292,9 +15292,6 @@ var displaySuggestions = function(suggestions) {
     card.classList.add("suggestion-card");
     const cardHeader = document.createElement("div");
     cardHeader.classList.add("card-header");
-    const headerIcon = document.createElement("i");
-    headerIcon.classList.add("fas", "fa-utensils");
-    cardHeader.appendChild(headerIcon);
     const title = document.createElement("span");
     title.textContent = suggestion.suggestion;
     cardHeader.appendChild(title);
@@ -15304,27 +15301,25 @@ var displaySuggestions = function(suggestions) {
     const timeItem = document.createElement("div");
     timeItem.classList.add("card-item");
     const timeIcon = document.createElement("i");
-    timeIcon.classList.add("fas", "fa-clock");
+    timeIcon.classList.add("icon", "fas", "fa-clock");
     timeItem.appendChild(timeIcon);
     const timeText = document.createElement("span");
-    timeText.textContent = humanReadableTime(suggestion.timestamp);
+    timeText.textContent = humanReadableTime(suggestion.time);
     timeItem.appendChild(timeText);
     cardBody.appendChild(timeItem);
     const statusItem = document.createElement("div");
     statusItem.classList.add("card-item");
     const statusIcon = document.createElement("i");
-    statusIcon.classList.add("fas", "fa-cog");
+    statusIcon.classList.add("icon", "fas", "fa-cog");
     statusItem.appendChild(statusIcon);
     const statusText = document.createElement("span");
     statusText.textContent = suggestion.status;
     statusItem.appendChild(statusText);
     const typeIcon = document.createElement("i");
-    if (suggestion.status === "Pending") {
-      typeIcon.classList.add("fas", "fa-exclamation-circle");
-    } else if (suggestion.status === "In Progress") {
-      typeIcon.classList.add("fas", "fa-spinner");
-    } else if (suggestion.status === "Resolved") {
-      typeIcon.classList.add("fas", "fa-check-circle");
+    if (suggestion.type == "dish") {
+      typeIcon.classList.add("icon", "fas", "fa-utensils");
+    } else if (suggestion.type == "general") {
+      typeIcon.classList.add("icon", "fas", "fa-question");
     }
     statusItem.appendChild(typeIcon);
     const typeText = document.createElement("span");
@@ -15334,7 +15329,7 @@ var displaySuggestions = function(suggestions) {
     const resolutionItem = document.createElement("div");
     resolutionItem.classList.add("card-item");
     const resolutionIcon = document.createElement("i");
-    resolutionIcon.classList.add("fas", "fa-comment-dots");
+    resolutionIcon.classList.add("icon", "fas", "fa-comment-dots");
     resolutionItem.appendChild(resolutionIcon);
     const resolutionText = document.createElement("span");
     resolutionText.textContent = suggestion.resolution;
