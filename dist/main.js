@@ -15307,7 +15307,7 @@ var displaySuggestions = function(suggestions) {
     timeIcon.classList.add("fas", "fa-clock");
     timeItem.appendChild(timeIcon);
     const timeText = document.createElement("span");
-    timeText.textContent = suggestion.time;
+    timeText.textContent = humanReadableTime(suggestion.timestamp);
     timeItem.appendChild(timeText);
     cardBody.appendChild(timeItem);
     const statusItem = document.createElement("div");
@@ -15331,6 +15331,10 @@ var displaySuggestions = function(suggestions) {
     card.appendChild(cardBody);
     suggestionContainer.appendChild(card);
   });
+};
+var humanReadableTime = function(timestamp) {
+  const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1e6);
+  return date.toLocaleString();
 };
 var firebaseConfig2 = {
   apiKey: "AIzaSyDllOEaNJTcldiOZR6DwNL-VnbbCmDtXB4",

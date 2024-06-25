@@ -51,7 +51,7 @@ function displaySuggestions(suggestions) {
         timeIcon.classList.add('fas', 'fa-clock');
         timeItem.appendChild(timeIcon);
         const timeText = document.createElement('span');
-        timeText.textContent = suggestion.time;
+        timeText.textContent = humanReadableTime(suggestion.timestamp);
         timeItem.appendChild(timeText);
         cardBody.appendChild(timeItem);
 
@@ -82,3 +82,8 @@ function displaySuggestions(suggestions) {
 }
 
 window.addEventListener('DOMContentLoaded', fetchSuggestions);
+
+function humanReadableTime(timestamp) {
+    const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
+    return date.toLocaleString();
+}
