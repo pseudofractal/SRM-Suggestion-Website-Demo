@@ -16016,6 +16016,8 @@ async function handleFormSubmit(event) {
   const type = document.getElementById("suggestion-type").value;
   const suggestion = document.getElementById("suggestion-text").value;
   const user = auth5.currentUser;
+  console.log("Submitting suggestion:", type, suggestion);
+  console.log("Current user:", user);
   if (user) {
     try {
       const docRef = await addDoc(collection(db2, "suggestions"), {

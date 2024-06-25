@@ -8,10 +8,12 @@ const auth = getAuth();
 // Function to handle form submission
 async function handleFormSubmit(event) {
     event.preventDefault();
-
     const type = document.getElementById('suggestion-type').value;
     const suggestion = document.getElementById('suggestion-text').value;
     const user = auth.currentUser;
+
+    console.log('Submitting suggestion:', type, suggestion);
+    console.log('Current user:', user);
 
     if (user) {
         try {
