@@ -14,7 +14,7 @@
         <li><strong>SRM Suggestions</strong></li>
     </ul>
     <ul>
-        <li id="submit-suggestion-btn" class="hidden"><a href="#submit-suggestion" role="button">Suggestion Form</a></li>
+        <li id="submit-suggestion-btn" class="hidden"><a href="#submit-suggestion" role="button">Submit Suggestion</a></li>
         <li id="signin-btn"><button onclick="signInWithGoogle()" aria-label="Sign in with Google">Sign In with Google</button></li>
     </ul>
 </nav>
@@ -23,7 +23,7 @@
     <section>
         <hgroup>
             <h2>Suggestion List</h2>
-            <h3>A time sorted list of all the suggestions SRMC has received.</h3>
+            <h3>A list of all the suggestions SRMC has received.</h3>
         </hgroup>
         <p>Below is a list of all suggestions along with their submission times, current consideration status, and any comments regarding the consideration process from SRMC members.</p>
         <p>In order to submit a new suggestion, please login using your IISER Mohali mail account in top right corner.</p>
@@ -32,17 +32,17 @@
         <div id="filters">
             <label for="filter-type">Filter by Type</label>
             <select id="filter-type" name="filter-type">
-                <option value="all">All</option>
+                <option value="All">All</option>
                 <option value="Dish">Dish</option>
                 <option value="General">General</option>
             </select>
 
             <label for="filter-status">Filter by Status</label>
             <select id="filter-status" name="filter-status">
-                <option value="all">All</option>
-                <option value="processing">Processing</option>
-                <option value="completed">Completed</option>
-                <option value="rejected">Rejected</option>
+                <option value="All">All</option>
+                <option value="Processing">Processing</option>
+                <option value="Completed">Completed</option>
+                <option value="Rejected">Rejected</option>
             </select>
 
             <button onclick="fetchSuggestions()">Apply Filters</button>
@@ -57,6 +57,14 @@
     <section id="submit-suggestion" class="hidden">
         <hgroup>
             <h2>Submit a Suggestion</h2>
+            <p>
+                While writing a suggestion, please ensure that you select the correct category.
+                Also mention the reason in the same box, for general suggestions.
+            </p>
+            <p>
+                You can fill the below form multiple times, please try to keep only one suggestion per entry.
+                Please note the form is not anonymous and we store only your email address.
+            </p>
         </hgroup>
         <label for="suggestion-type">Type</label>
         <select id="suggestion-type" name="type" required>

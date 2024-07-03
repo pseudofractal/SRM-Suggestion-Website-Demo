@@ -39,14 +39,15 @@ button:hover {
     padding: 20px;
     margin: 10px;
     font-family: 'Arial', sans-serif;
-    color: #333;
+    color: #11111b;
 }
 
 .card-header {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     font-size: 1.2em;
     margin-bottom: 15px;
+    color: #11111b;
 }
 
 .card-header i {
@@ -55,14 +56,24 @@ button:hover {
 }
 
 .card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
     display: flex;
     flex-direction: column;
+    color: #11111b;
+}
+
+.card-body.expanded {
+    max-height: 1000px;
+    overflow: auto;
 }
 
 .card-item {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
+    color: #11111b;
 }
 
 .card-item i {
@@ -72,4 +83,38 @@ button:hover {
 
 .icon {
     padding-left: 10px;
+}
+
+.expand-button {
+    cursor: pointer;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: #11111b;
+    color: #89b4fa;
+    border: none;
+    border-radius: 3px;
+    margin-top: 5px;
+}
+
+.expand-button-container {
+    width: 100%;
+    text-align: center;
+}
+
+.title-text {
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 1000px;
+    display: -webkit-box;
+    -webkit-line-clamp: 10;
+    -webkit-box-orient: vertical;
+    color: #11111b;
+}
+
+.resolution-text {
+    color: #11111b;
 }

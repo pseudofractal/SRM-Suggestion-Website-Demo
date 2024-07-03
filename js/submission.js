@@ -18,10 +18,6 @@ async function submitSuggestion() {
 
     try {
         const user = auth.currentUser;
-        console.log(user);
-        console.log(user.email);
-        console.log(!user)
-        console.log(!user.email.endsWith("@iisermohali.ac.in"))
         if (!user || !user.email.endsWith("@iisermohali.ac.in")) {
             console.log(user.email);
             alert('You must be signed in with IISER GMail ID to submit a suggestion');
