@@ -188,6 +188,15 @@ button:hover {
         flex-direction: column;
         width: 100%;
     }
+
+    .vote-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .vote-button {
+        margin: 5px 0;
+    }
 }
 
 .vote-section {
