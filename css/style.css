@@ -125,12 +125,7 @@ button:hover {
 
 .title-text {
     white-space: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-height: 1000px;
-    display: -webkit-box;
-    -webkit-line-clamp: 200;
-    -webkit-box-orient: vertical;
+    overflow: auto;
     color: #11111b;
 }
 
@@ -139,7 +134,6 @@ button:hover {
     overflow: auto;
 }
 
-/* Flexbox container for filters */
 .filter-container {
     display: flex;
     align-items: center;
@@ -150,7 +144,6 @@ button:hover {
     margin-right: 10px;
 }
 
-/* Custom scrollbar styles */
 .resolution-text::-webkit-scrollbar {
     height: 12px;
 }
