@@ -80,7 +80,7 @@ button:hover {
 .card-item i {
     margin-right: 10px;
     color: #11111b;
-    font-size: 1.2em; /* Ensuring all icons are the same size */
+    font-size: 1.2em;
 }
 
 .resolution-item {
@@ -96,8 +96,8 @@ button:hover {
 }
 
 .resolution-item-header i {
-    font-size: 1.2em; /* Ensuring the resolution icon is the same size */
-    margin-right: 5px; /* Adding space between icon and text */
+    font-size: 1.2em;
+    margin-right: 5px;
 }
 
 .icon {
@@ -137,6 +137,17 @@ button:hover {
 .resolution-text {
     color: #11111b;
     overflow: auto;
+}
+
+/* Flexbox container for filters */
+.filter-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.filter-container > div {
+    margin-right: 10px;
 }
 
 /* Custom scrollbar styles */

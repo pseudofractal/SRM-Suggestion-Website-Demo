@@ -29,23 +29,27 @@
         <p>In order to submit a new suggestion, please login using your IISER Mohali mail account in top right corner.</p>
 
         <!-- Filter Menus -->
-        <div id="filters">
-            <label for="filter-type">Filter by Type</label>
-            <select id="filter-type" name="filter-type">
-                <option value="All">All</option>
-                <option value="Dish">Dish</option>
-                <option value="General">General</option>
-            </select>
-
-            <label for="filter-status">Filter by Status</label>
-            <select id="filter-status" name="filter-status">
-                <option value="All">All</option>
-                <option value="Processing">Processing</option>
-                <option value="Completed">Completed</option>
-                <option value="Rejected">Rejected</option>
-            </select>
-
-            <button onclick="fetchSuggestions()">Apply Filters</button>
+        <div id="filters" class="filter-container">
+            <div>
+                <label for="filter-type">Filter by Type</label>
+                <select id="filter-type" name="filter-type">
+                    <option value="All">All</option>
+                    <option value="Dish">Dish</option>
+                    <option value="General">General</option>
+                </select>
+            </div>
+            <div>
+                <label for="filter-status">Filter by Status</label>
+                <select id="filter-status" name="filter-status">
+                    <option value="All">All</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+            <div>
+                <button onclick="fetchSuggestions()">Apply Filters</button>
+            </div>
         </div>
     </section>
 
