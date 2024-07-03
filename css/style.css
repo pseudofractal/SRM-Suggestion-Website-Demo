@@ -53,6 +53,9 @@ button:hover {
     margin: 10px;
     font-family: 'JuliaMono', monospace;
     color: #11111b;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    width: 100%;
 }
 
 .card-header {
@@ -61,6 +64,7 @@ button:hover {
     font-size: 1.2em;
     margin-bottom: 15px;
     color: #11111b;
+    width: 100%;
 }
 
 .card-header i {
@@ -75,6 +79,7 @@ button:hover {
     display: flex;
     flex-direction: column;
     color: #11111b;
+    width: 100%;
 }
 
 .card-body.expanded {
@@ -88,6 +93,7 @@ button:hover {
     margin-bottom: 10px;
     color: #11111b;
     word-break: break-word;
+    width: 100%;
 }
 
 .card-item i {
@@ -101,6 +107,7 @@ button:hover {
     flex-direction: column;
     color: #11111b;
     word-break: break-word;
+    width: 100%;
 }
 
 .resolution-item-header {
@@ -138,25 +145,32 @@ button:hover {
 }
 
 .title-text {
-    white-space: normal;
-    overflow: auto;
+    overflow: visible;
+    width: 100%;
     color: #11111b;
-    text-align: left;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .resolution-text {
     color: #11111b;
-    overflow: auto;
+    overflow: visible;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    width: 100%;
 }
 
 .filter-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
 }
 
 .filter-container > div {
     margin-right: 10px;
+    width: 100%;
 }
 
 @media (max-width: 600px) {
@@ -167,10 +181,12 @@ button:hover {
     .filter-container > div {
         margin-right: 0;
         margin-bottom: 10px;
+        width: 100%;
     }
 
     .card-header {
         flex-direction: column;
+        width: 100%;
     }
 }
 
@@ -178,6 +194,7 @@ button:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
 }
 
 .vote-button {
@@ -211,10 +228,12 @@ button:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
 }
 
 .card-body {
     display: none;
+    width: 100%;
 }
 
 .expand-button {

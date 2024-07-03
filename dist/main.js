@@ -16027,20 +16027,20 @@ var Ce = new WeakMap;
   }, "PUBLIC").setMultipleInstances(true)), registerVersion(S, "4.6.3", e), registerVersion(S, "4.6.3", "esm2017");
 })();
 // js/suggestions.js
-async function fetchSuggestions() {
+async function fetchSuggestions(user = null) {
   const suggestionsCol = collection(db, "suggestions");
   const suggestionSnapshot = await getDocs(suggestionsCol);
   const suggestions = suggestionSnapshot.docs.map((doc2) => ({ id: doc2.id, ...doc2.data() }));
-  applyFilters(suggestions);
+  applyFilters(suggestions, user);
 }
-var applyFilters = function(suggestions) {
+var applyFilters = function(suggestions, user) {
   const filterType = getInputValue("filter-type") || "All";
   const filterStatus = getInputValue("filter-status") || "All";
   const filteredSuggestions = suggestions.filter((suggestion) => (filterType === "All" || suggestion.type === filterType) && (filterStatus === "All" || suggestion.status === filterStatus));
   if (filteredSuggestions.length === 0) {
     displayNoSuggestionsMessage();
   } else {
-    displaySuggestions(filteredSuggestions);
+    displaySuggestions(filteredSuggestions, user);
   }
 };
 var displayNoSuggestionsMessage = function() {
@@ -16053,41 +16053,47 @@ var displayNoSuggestionsMessage = function() {
 var clearSuggestions = function() {
   document.getElementById("suggestions-list").innerHTML = "";
 };
-var displaySuggestions = function(suggestions) {
+var displaySuggestions = function(suggestions, user) {
   clearSuggestions();
   suggestions.sort((a, b2) => b2.time.seconds - a.time.seconds);
   const suggestionContainer = document.getElementById("suggestions-list");
   suggestions.forEach((suggestion) => {
-    const card = createSuggestionCard(suggestion);
+    const card = createSuggestionCard(suggestion, user);
     suggestionContainer.appendChild(card);
   });
 };
-var createSuggestionCard = function(suggestion) {
+var createSuggestionCard = function(suggestion, user) {
   const card = document.createElement("div");
   card.classList.add("suggestion-card", suggestion.status.toLowerCase());
   card.setAttribute("data-id", suggestion.id);
-  const cardHeader = createCardHeader(suggestion);
+  const cardHeader = createCardHeader(suggestion, user);
   const cardBody = createCardBody(suggestion);
   card.appendChild(cardHeader);
   card.appendChild(cardBody);
   return card;
 };
-var createCardHeader = function(suggestion) {
+var createCardHeader = function(suggestion, user) {
   const cardHeader = document.createElement("div");
   cardHeader.classList.add("card-header");
   const title = document.createElement("p");
   title.classList.add("title-text");
   title.textContent = suggestion.suggestion;
-  title.style.textAlign = "left";
   cardHeader.appendChild(title);
   const voteSection = document.createElement("div");
   voteSection.className = "vote-section";
-  const upvoteButton = createVoteButton("upvote", "fas fa-thumbs-up", () => updateVotes(suggestion.id, true), suggestion.upvotedBy);
-  const downvoteButton = createVoteButton("downvote", "fas fa-thumbs-down", () => updateVotes(suggestion.id, false), suggestion.downvotedBy);
-  const voteCount = document.createElement("span");
-  voteCount.className = "vote-count";
-  voteCount.textContent = `Votes: ${suggestion.votes || 0}`;
-  voteSection.append(upvoteButton, voteCount, downvoteButton);
+  if (user) {
+    const upvoteButton = createVoteButton("upvote", "fas fa-thumbs-up", () => updateVotes(suggestion.id, true), suggestion.upvotedBy);
+    const downvoteButton = createVoteButton("downvote", "fas fa-thumbs-down", () => updateVotes(suggestion.id, false), suggestion.downvotedBy);
+    const voteCount = document.createElement("span");
+    voteCount.className = "vote-count";
+    voteCount.textContent = `Votes: ${suggestion.votes || 0}`;
+    voteSection.append(upvoteButton, voteCount, downvoteButton);
+  } else {
+    const voteCount = document.createElement("span");
+    voteCount.className = "vote-count";
+    voteCount.textContent = `Votes: ${suggestion.votes || 0}`;
+    voteSection.appendChild(voteCount);
+  }
   cardHeader.appendChild(voteSection);
   const expandButton = createExpandButton();
   cardHeader.appendChild(expandButton);
@@ -16098,7 +16104,6 @@ var createVoteButton = function(className, iconClass, onClick, voteList) {
   button.className = `vote-button ${className}`;
   button.innerHTML = `<i class="${iconClass}"></i>`;
   button.onclick = onClick;
-  const suggestionId = button.closest(".suggestion-card") ? button.closest(".suggestion-card").getAttribute("data-id") : null;
   if (auth5.currentUser && voteList.includes(auth5.currentUser.email)) {
     button.disabled = true;
   }
@@ -16205,8 +16210,9 @@ var auth5 = getAuth(app9);
 document.addEventListener("DOMContentLoaded", function() {
   onAuthStateChanged(auth5, (user) => {
     if (user) {
-      fetchSuggestions();
+      fetchSuggestions(user);
     } else {
+      fetchSuggestions();
       console.log("User not signed in");
     }
   });

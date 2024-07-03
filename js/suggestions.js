@@ -10,21 +10,22 @@ const auth = getAuth(app);
 document.addEventListener('DOMContentLoaded', function () {
     onAuthStateChanged(auth, user => {
         if (user) {
-            fetchSuggestions();
+            fetchSuggestions(user);
         } else {
+            fetchSuggestions();
             console.log('User not signed in');
         }
     });
 });
 
-async function fetchSuggestions() {
+async function fetchSuggestions(user = null) {
     const suggestionsCol = collection(db, 'suggestions');
     const suggestionSnapshot = await getDocs(suggestionsCol);
     const suggestions = suggestionSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    applyFilters(suggestions);
+    applyFilters(suggestions, user);
 }
 
-function applyFilters(suggestions) {
+function applyFilters(suggestions, user) {
     const filterType = getInputValue('filter-type') || 'All';
     const filterStatus = getInputValue('filter-status') || 'All';
     const filteredSuggestions = suggestions.filter(suggestion =>
@@ -34,7 +35,7 @@ function applyFilters(suggestions) {
     if (filteredSuggestions.length === 0) {
         displayNoSuggestionsMessage();
     } else {
-        displaySuggestions(filteredSuggestions);
+        displaySuggestions(filteredSuggestions, user);
     }
 }
 
@@ -50,22 +51,22 @@ function clearSuggestions() {
     document.getElementById('suggestions-list').innerHTML = '';
 }
 
-function displaySuggestions(suggestions) {
+function displaySuggestions(suggestions, user) {
     clearSuggestions();
     suggestions.sort((a, b) => b.time.seconds - a.time.seconds);
     const suggestionContainer = document.getElementById('suggestions-list');
     suggestions.forEach(suggestion => {
-        const card = createSuggestionCard(suggestion);
+        const card = createSuggestionCard(suggestion, user);
         suggestionContainer.appendChild(card);
     });
 }
 
-function createSuggestionCard(suggestion) {
+function createSuggestionCard(suggestion, user) {
     const card = document.createElement('div');
     card.classList.add('suggestion-card', suggestion.status.toLowerCase());
     card.setAttribute('data-id', suggestion.id);
 
-    const cardHeader = createCardHeader(suggestion);
+    const cardHeader = createCardHeader(suggestion, user);
     const cardBody = createCardBody(suggestion);
 
     card.appendChild(cardHeader);
@@ -74,25 +75,32 @@ function createSuggestionCard(suggestion) {
     return card;
 }
 
-function createCardHeader(suggestion) {
+function createCardHeader(suggestion, user) {
     const cardHeader = document.createElement('div');
     cardHeader.classList.add('card-header');
 
     const title = document.createElement('p');
     title.classList.add('title-text');
     title.textContent = suggestion.suggestion;
-    title.style.textAlign = 'left';
     cardHeader.appendChild(title);
 
     const voteSection = document.createElement('div');
     voteSection.className = 'vote-section';
-    const upvoteButton = createVoteButton('upvote', 'fas fa-thumbs-up', () => updateVotes(suggestion.id, true), suggestion.upvotedBy);
-    const downvoteButton = createVoteButton('downvote', 'fas fa-thumbs-down', () => updateVotes(suggestion.id, false), suggestion.downvotedBy);
-    const voteCount = document.createElement('span');
-    voteCount.className = 'vote-count';
-    voteCount.textContent = `Votes: ${suggestion.votes || 0}`;
+    if (user) {
+        const upvoteButton = createVoteButton('upvote', 'fas fa-thumbs-up', () => updateVotes(suggestion.id, true), suggestion.upvotedBy);
+        const downvoteButton = createVoteButton('downvote', 'fas fa-thumbs-down', () => updateVotes(suggestion.id, false), suggestion.downvotedBy);
+        const voteCount = document.createElement('span');
+        voteCount.className = 'vote-count';
+        voteCount.textContent = `Votes: ${suggestion.votes || 0}`;
 
-    voteSection.append(upvoteButton, voteCount, downvoteButton);
+        voteSection.append(upvoteButton, voteCount, downvoteButton);
+    } else {
+        const voteCount = document.createElement('span');
+        voteCount.className = 'vote-count';
+        voteCount.textContent = `Votes: ${suggestion.votes || 0}`;
+
+        voteSection.appendChild(voteCount);
+    }
     cardHeader.appendChild(voteSection);
 
     const expandButton = createExpandButton();
@@ -106,8 +114,6 @@ function createVoteButton(className, iconClass, onClick, voteList) {
     button.className = `vote-button ${className}`;
     button.innerHTML = `<i class="${iconClass}"></i>`;
     button.onclick = onClick;
-
-    const suggestionId = button.closest('.suggestion-card') ? button.closest('.suggestion-card').getAttribute('data-id') : null;
 
     if (auth.currentUser && voteList.includes(auth.currentUser.email)) {
         button.disabled = true;
