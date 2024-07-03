@@ -1,5 +1,11 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
-@import url('https://fonts.googleapis.com/css2?family=JuliaMono&display=swap');
+
+@font-face {
+    font-family: 'JuliaMono';
+    src: url('https://juliamono.netlify.app/assets/fonts/JuliaMono-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
 
 body {
     font-family: 'JuliaMono', monospace;
