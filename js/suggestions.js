@@ -6,9 +6,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 export async function fetchSuggestions() {
-    console.log('Fetching Suggestions from firebase');
-    const suggestionsCol = collection(db, 'suggestions');
     try {
+        const suggestionsCol = collection(db, 'suggestions');
         const suggestionSnapshot = await getDocs(suggestionsCol);
         const suggestions = suggestionSnapshot.docs.map(doc => doc.data());
         applyFilters(suggestions);
@@ -18,10 +17,8 @@ export async function fetchSuggestions() {
 }
 
 function applyFilters(suggestions) {
-    const filterType = document.getElementById('filter-type').value;
-    const filterStatus = document.getElementById('filter-status').value;
-    console.log('Filter Status: ', filterStatus);
-    console.log('Filter Type: ', filterType);
+    const filterType = getInputValue('filter-type');
+    const filterStatus = getInputValue('filter-status');
     const filteredSuggestions = suggestions.filter(suggestion => {
         const matchesType = filterType === 'All' || suggestion.type === filterType;
         const matchesStatus = filterStatus === 'All' || suggestion.status === filterStatus;
@@ -30,10 +27,9 @@ function applyFilters(suggestions) {
 
     if (filteredSuggestions.length === 0) {
         displayNoSuggestionsMessage();
-        return;
+    } else {
+        displaySuggestions(filteredSuggestions);
     }
-
-    displaySuggestions(filteredSuggestions);
 }
 
 function displayNoSuggestionsMessage() {
@@ -45,14 +41,12 @@ function displayNoSuggestionsMessage() {
 }
 
 function clearSuggestions() {
-    const suggestionContainer = document.getElementById('suggestions-list');
-    suggestionContainer.innerHTML = '';
+    document.getElementById('suggestions-list').innerHTML = '';
 }
 
 function displaySuggestions(suggestions) {
     clearSuggestions();
     const suggestionContainer = document.getElementById('suggestions-list');
-
     suggestions.forEach(suggestion => {
         const card = createSuggestionCard(suggestion);
         suggestionContainer.appendChild(card);
@@ -61,8 +55,7 @@ function displaySuggestions(suggestions) {
 
 function createSuggestionCard(suggestion) {
     const card = document.createElement('div');
-    card.classList.add('suggestion-card');
-    card.classList.add(suggestion.status.toLowerCase());
+    card.classList.add('suggestion-card', suggestion.status.toLowerCase());
 
     const cardHeader = createCardHeader(suggestion);
     const cardBody = createCardBody(suggestion);
@@ -82,21 +75,22 @@ function createCardHeader(suggestion) {
     title.textContent = suggestion.suggestion;
     cardHeader.appendChild(title);
 
-    const expandButtonContainer = document.createElement('div');
-    expandButtonContainer.classList.add('expand-button-container');
+    const expandButton = createExpandButton();
+    cardHeader.appendChild(expandButton);
 
+    return cardHeader;
+}
+
+function createExpandButton() {
     const expandButton = document.createElement('button');
     expandButton.textContent = 'More Info';
     expandButton.classList.add('expand-button');
-    expandButton.addEventListener('click', (event) => {
+    expandButton.addEventListener('click', event => {
         const cardBody = event.target.closest('.suggestion-card').querySelector('.card-body');
         cardBody.classList.toggle('expanded');
         expandButton.textContent = cardBody.classList.contains('expanded') ? 'Less Info' : 'More Info';
     });
-
-    expandButtonContainer.appendChild(expandButton);
-    cardHeader.appendChild(expandButtonContainer);
-    return cardHeader;
+    return expandButton;
 }
 
 function createCardBody(suggestion) {
@@ -106,7 +100,7 @@ function createCardBody(suggestion) {
     const timeItem = createCardItem('fa-clock', humanReadableTime(suggestion.time));
     const statusItem = createCardItem('fa-info', suggestion.status);
     const typeItem = createCardItem(getTypeIcon(suggestion.type), suggestion.type);
-    const resolutionItem = createCardItem('fa-comment-dots', suggestion.resolution, true);
+    const resolutionItem = createResolutionItem(suggestion.resolution);
 
     cardBody.appendChild(timeItem);
     cardBody.appendChild(statusItem);
@@ -116,19 +110,44 @@ function createCardBody(suggestion) {
     return cardBody;
 }
 
-function createCardItem(iconClass, textContent, isParagraph = false) {
+function createCardItem(iconClass, textContent) {
     const cardItem = document.createElement('div');
     cardItem.classList.add('card-item');
+
     const icon = document.createElement('i');
     icon.classList.add('icon', 'fas', iconClass);
     cardItem.appendChild(icon);
-    const text = isParagraph ? document.createElement('p') : document.createElement('span');
-    if (isParagraph) {
-        text.classList.add('resolution-text');
-    }
+
+    const text = document.createElement('span');
     text.textContent = textContent;
     cardItem.appendChild(text);
+
     return cardItem;
+}
+
+function createResolutionItem(resolutionText) {
+    const resolutionItem = document.createElement('div');
+    resolutionItem.classList.add('resolution-item');
+
+    const resolutionHeader = document.createElement('div');
+    resolutionHeader.classList.add('resolution-item-header');
+
+    const icon = document.createElement('i');
+    icon.classList.add('icon', 'fas', 'fa-comment-dots');
+    resolutionHeader.appendChild(icon);
+
+    const headerText = document.createElement('span');
+    headerText.textContent = "Council's Statement:";
+    resolutionHeader.appendChild(headerText);
+
+    const text = document.createElement('p');
+    text.classList.add('resolution-text');
+    text.textContent = resolutionText;
+
+    resolutionItem.appendChild(resolutionHeader);
+    resolutionItem.appendChild(text);
+
+    return resolutionItem;
 }
 
 function getTypeIcon(type) {
@@ -140,8 +159,9 @@ function humanReadableTime(timestamp) {
     return date.toLocaleString();
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
-    await fetchSuggestions();
-});
+function getInputValue(elementId) {
+    return document.getElementById(elementId).value;
+}
 
+window.addEventListener('DOMContentLoaded', fetchSuggestions);
 window.fetchSuggestions = fetchSuggestions;

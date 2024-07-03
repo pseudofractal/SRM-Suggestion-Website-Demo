@@ -10,6 +10,7 @@
 
 button {
     background-color: #eba0ac;
+    color: #11111b;
 }
 
 button:focus {
@@ -79,6 +80,24 @@ button:hover {
 .card-item i {
     margin-right: 10px;
     color: #11111b;
+    font-size: 1.2em; /* Ensuring all icons are the same size */
+}
+
+.resolution-item {
+    display: flex;
+    flex-direction: column;
+    color: #11111b;
+}
+
+.resolution-item-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.resolution-item-header i {
+    font-size: 1.2em; /* Ensuring the resolution icon is the same size */
+    margin-right: 5px; /* Adding space between icon and text */
 }
 
 .icon {
@@ -117,4 +136,24 @@ button:hover {
 
 .resolution-text {
     color: #11111b;
+    overflow: auto;
+}
+
+/* Custom scrollbar styles */
+.resolution-text::-webkit-scrollbar {
+    height: 12px;
+}
+
+.resolution-text::-webkit-scrollbar-thumb {
+    background: #11111b;
+    border-radius: 6px;
+}
+
+.resolution-text::-webkit-scrollbar-thumb:hover {
+    background: #333333;
+}
+
+.resolution-text::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 6px;
 }

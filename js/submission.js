@@ -1,5 +1,5 @@
 import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { initializeApp } from "firebase/app";
 import { firebaseConfig } from "./firebaseConfig.js";
 
@@ -8,8 +8,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 async function submitSuggestion() {
-    const suggestionType = document.getElementById('suggestion-type').value;
-    const suggestionText = document.getElementById('suggestion-text').value;
+    const suggestionType = getInputValue('suggestion-type');
+    const suggestionText = getInputValue('suggestion-text');
 
     if (!suggestionType || !suggestionText) {
         alert('Please fill in all fields');
@@ -18,28 +18,50 @@ async function submitSuggestion() {
 
     try {
         const user = auth.currentUser;
-        if (!user || !user.email.endsWith("@iisermohali.ac.in")) {
-            console.log(user.email);
+        if (!isValidUser(user)) {
             alert('You must be signed in with IISER GMail ID to submit a suggestion');
             return;
         }
 
-        await addDoc(collection(db, 'suggestions'), {
-            email: user.email,
-            resolution: "Waiting for next council meeting.",
-            status: "Processing",
-            suggestion: suggestionText,
-            time: Timestamp.now(),
-            type: suggestionType,
-        });
-
+        await addSuggestionToDB(user.email, suggestionType, suggestionText);
         alert('Suggestion submitted successfully');
-        document.getElementById('suggestion-type').value = '';
-        document.getElementById('suggestion-text').value = '';
+        resetForm();
     } catch (error) {
-        console.error('Error adding document: ', error);
-        alert('Failed to submit suggestion: ' + error.message);
+        handleSubmissionError(error);
     }
+}
+
+function getInputValue(elementId) {
+    return document.getElementById(elementId).value;
+}
+
+function isValidUser(user) {
+    return user && user.email.endsWith("@iisermohali.ac.in");
+}
+
+async function addSuggestionToDB(email, type, suggestion) {
+    await addDoc(collection(db, 'suggestions'), {
+        email,
+        resolution: "Waiting for next council meeting.",
+        status: "Processing",
+        suggestion,
+        time: Timestamp.now(),
+        type,
+    });
+}
+
+function resetForm() {
+    setInputValue('suggestion-type', '');
+    setInputValue('suggestion-text', '');
+}
+
+function setInputValue(elementId, value) {
+    document.getElementById(elementId).value = value;
+}
+
+function handleSubmissionError(error) {
+    console.error('Error adding document: ', error);
+    alert('Failed to submit suggestion: ' + error.message);
 }
 
 window.submitSuggestion = submitSuggestion;

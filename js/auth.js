@@ -1,5 +1,5 @@
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { firebaseConfig } from "./firebaseConfig.js";
 
 const app = initializeApp(firebaseConfig);
@@ -9,18 +9,28 @@ const googleProvider = new GoogleAuthProvider();
 export async function signInWithGoogle() {
     try {
         const result = await signInWithPopup(auth, googleProvider);
-        updateUIOnSignIn();
+        handleSignInSuccess();
     } catch (error) {
-        console.error('Sign in failed:', error);
-        alert('Sign in failed: ' + error.message);
+        handleSignInError(error);
     }
 }
 
-function updateUIOnSignIn() {
-    document.getElementById('signin-btn').classList.add('hidden');
-    document.getElementById('submit-suggestion-btn').classList.remove('hidden');
-    document.getElementById('submit-suggestion').classList.remove('hidden');
+function handleSignInSuccess() {
+    toggleElementVisibility('signin-btn', false);
+    toggleElementVisibility('submit-suggestion-btn', true);
+    toggleElementVisibility('submit-suggestion', true);
+}
+
+function handleSignInError(error) {
+    console.error('Sign in failed:', error);
+    alert('Sign in failed: ' + error.message);
+}
+
+function toggleElementVisibility(elementId, isVisible) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.classList.toggle('hidden', !isVisible);
+    }
 }
 
 window.signInWithGoogle = signInWithGoogle;
-window.updateUIOnSignIn = updateUIOnSignIn;

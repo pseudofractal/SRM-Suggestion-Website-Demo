@@ -1651,11 +1651,6 @@ class HeartbeatStorageImpl {
 }
 registerCoreComponents("");
 
-// node_modules/firebase/app/dist/esm/index.esm.js
-var name2 = "firebase";
-var version2 = "10.12.2";
-registerVersion(name2, version2, "app");
-
 // node_modules/tslib/tslib.es6.mjs
 function __rest(s, e) {
   var t = {};
@@ -2211,8 +2206,8 @@ async function handleRecaptchaFlow(authInstance, request, actionName, actionMeth
     });
   }
 }
-var initializeAuth = function(app4, deps) {
-  const provider = _getProvider(app4, "auth");
+var initializeAuth = function(app2, deps) {
+  const provider = _getProvider(app2, "auth");
   if (provider.isInitialized()) {
     const auth2 = provider.getImmediate();
     const initialOptions = provider.getOptions();
@@ -2825,7 +2820,7 @@ async function _openIframe(auth) {
     });
   }));
 }
-var _open = function(auth, url, name3, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT) {
+var _open = function(auth, url, name2, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT) {
   const top = Math.max((window.screen.availHeight - height) / 2, 0).toString();
   const left = Math.max((window.screen.availWidth - width) / 2, 0).toString();
   let target = "";
@@ -2836,8 +2831,8 @@ var _open = function(auth, url, name3, width = DEFAULT_WIDTH, height = DEFAULT_H
     left
   });
   const ua = getUA().toLowerCase();
-  if (name3) {
-    target = _isChromeIOS(ua) ? TARGET_BLANK : name3;
+  if (name2) {
+    target = _isChromeIOS(ua) ? TARGET_BLANK : name2;
   }
   if (_isFirefox(ua)) {
     url = url || FIREFOX_EMPTY_URL;
@@ -2931,11 +2926,11 @@ var getVersionForPlatform = function(clientPlatform) {
 };
 var registerAuth = function(clientPlatform) {
   _registerComponent(new Component("auth", (container, { options: deps }) => {
-    const app4 = container.getProvider("app").getImmediate();
+    const app2 = container.getProvider("app").getImmediate();
     const heartbeatServiceProvider = container.getProvider("heartbeat");
     const appCheckServiceProvider = container.getProvider("app-check-internal");
-    const { apiKey, authDomain } = app4.options;
-    _assert(apiKey && !apiKey.includes(":"), "invalid-api-key", { appName: app4.name });
+    const { apiKey, authDomain } = app2.options;
+    _assert(apiKey && !apiKey.includes(":"), "invalid-api-key", { appName: app2.name });
     const config = {
       apiKey,
       authDomain,
@@ -2945,7 +2940,7 @@ var registerAuth = function(clientPlatform) {
       apiScheme: "https",
       sdkClientVersion: _getClientVersion(clientPlatform)
     };
-    const authInstance = new AuthImpl(app4, heartbeatServiceProvider, appCheckServiceProvider, config);
+    const authInstance = new AuthImpl(app2, heartbeatServiceProvider, appCheckServiceProvider, config);
     _initializeAuthInstance(authInstance, deps);
     return authInstance;
   }, "PUBLIC").setInstantiationMode("EXPLICIT").setInstanceCreatedCallback((container, _instanceIdentifier, _instance) => {
@@ -2956,15 +2951,15 @@ var registerAuth = function(clientPlatform) {
     const auth = _castAuth(container.getProvider("auth").getImmediate());
     return ((auth2) => new AuthInterop(auth2))(auth);
   }, "PRIVATE").setInstantiationMode("EXPLICIT"));
-  registerVersion(name3, version3, getVersionForPlatform(clientPlatform));
-  registerVersion(name3, version3, "esm2017");
+  registerVersion(name2, version2, getVersionForPlatform(clientPlatform));
+  registerVersion(name2, version2, "esm2017");
 };
-var getAuth = function(app4 = getApp()) {
-  const provider = _getProvider(app4, "auth");
+var getAuth = function(app2 = getApp()) {
+  const provider = _getProvider(app2, "auth");
   if (provider.isInitialized()) {
     return provider.getImmediate();
   }
-  const auth = initializeAuth(app4, {
+  const auth = initializeAuth(app2, {
     popupRedirectResolver: browserPopupRedirectResolver,
     persistence: [
       indexedDBLocalPersistence,
@@ -3572,9 +3567,9 @@ class PersistenceUserManager {
     this.persistence = persistence;
     this.auth = auth;
     this.userKey = userKey;
-    const { config, name: name3 } = this.auth;
-    this.fullUserKey = _persistenceKeyName(this.userKey, config.apiKey, name3);
-    this.fullPersistenceKey = _persistenceKeyName("persistence", config.apiKey, name3);
+    const { config, name: name2 } = this.auth;
+    this.fullUserKey = _persistenceKeyName(this.userKey, config.apiKey, name2);
+    this.fullPersistenceKey = _persistenceKeyName("persistence", config.apiKey, name2);
     this.boundEventHandler = auth._onStorageEvent.bind(auth);
     this.persistence._addListener(this.fullUserKey, this.boundEventHandler);
   }
@@ -3781,8 +3776,8 @@ class PasswordPolicyImpl {
 }
 
 class AuthImpl {
-  constructor(app4, heartbeatServiceProvider, appCheckServiceProvider, config) {
-    this.app = app4;
+  constructor(app2, heartbeatServiceProvider, appCheckServiceProvider, config) {
+    this.app = app2;
     this.heartbeatServiceProvider = heartbeatServiceProvider;
     this.appCheckServiceProvider = appCheckServiceProvider;
     this.config = config;
@@ -3810,7 +3805,7 @@ class AuthImpl {
     this.tenantId = null;
     this.settings = { appVerificationDisabledForTesting: false };
     this.frameworks = [];
-    this.name = app4.name;
+    this.name = app2.name;
     this.clientVersion = config.sdkClientVersion;
   }
   _initializeWithPersistence(persistenceHierarchy, popupRedirectResolver) {
@@ -5971,8 +5966,8 @@ class TotpSecret {
     return `otpauth://totp/${issuer}:${accountName}?secret=${this.secretKey}&issuer=${issuer}&algorithm=${this.hashingAlgorithm}&digits=${this.codeLength}`;
   }
 }
-var name3 = "@firebase/auth";
-var version3 = "1.7.4";
+var name2 = "@firebase/auth";
+var version2 = "1.7.4";
 
 class AuthInterop {
   constructor(auth) {
@@ -6067,6 +6062,11 @@ _setExternalJSProvider({
   recaptchaEnterpriseScript: "https://www.google.com/recaptcha/enterprise.js?render="
 });
 registerAuth("Browser");
+// node_modules/firebase/app/dist/esm/index.esm.js
+var name3 = "firebase";
+var version3 = "10.12.2";
+registerVersion(name3, version3, "app");
+
 // js/firebaseConfig.js
 var firebaseConfig = {
   apiKey: "AIzaSyDllOEaNJTcldiOZR6DwNL-VnbbCmDtXB4",
@@ -6082,22 +6082,30 @@ var firebaseConfig = {
 async function signInWithGoogle() {
   try {
     const result = await signInWithPopup(auth3, googleProvider);
-    updateUIOnSignIn();
+    handleSignInSuccess();
   } catch (error) {
-    console.error("Sign in failed:", error);
-    alert("Sign in failed: " + error.message);
+    handleSignInError(error);
   }
 }
-var updateUIOnSignIn = function() {
-  document.getElementById("signin-btn").classList.add("hidden");
-  document.getElementById("submit-suggestion-btn").classList.remove("hidden");
-  document.getElementById("submit-suggestion").classList.remove("hidden");
+var handleSignInSuccess = function() {
+  toggleElementVisibility("signin-btn", false);
+  toggleElementVisibility("submit-suggestion-btn", true);
+  toggleElementVisibility("submit-suggestion", true);
+};
+var handleSignInError = function(error) {
+  console.error("Sign in failed:", error);
+  alert("Sign in failed: " + error.message);
+};
+var toggleElementVisibility = function(elementId, isVisible) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.classList.toggle("hidden", !isVisible);
+  }
 };
 var app6 = initializeApp(firebaseConfig);
 var auth3 = getAuth(app6);
 var googleProvider = new GoogleAuthProvider;
 window.signInWithGoogle = signInWithGoogle;
-window.updateUIOnSignIn = updateUIOnSignIn;
 
 // node_modules/@firebase/webchannel-wrapper/dist/bloom-blob/esm/bloom_blob_es2018.js
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
@@ -15908,9 +15916,8 @@ var Ce = new WeakMap;
 })();
 // js/suggestions.js
 async function fetchSuggestions() {
-  console.log("Fetching Suggestions from firebase");
-  const suggestionsCol = collection(db, "suggestions");
   try {
+    const suggestionsCol = collection(db, "suggestions");
     const suggestionSnapshot = await getDocs(suggestionsCol);
     const suggestions = suggestionSnapshot.docs.map((doc2) => doc2.data());
     applyFilters(suggestions);
@@ -15919,10 +15926,8 @@ async function fetchSuggestions() {
   }
 }
 var applyFilters = function(suggestions) {
-  const filterType = document.getElementById("filter-type").value;
-  const filterStatus = document.getElementById("filter-status").value;
-  console.log("Filter Status: ", filterStatus);
-  console.log("Filter Type: ", filterType);
+  const filterType = getInputValue("filter-type");
+  const filterStatus = getInputValue("filter-status");
   const filteredSuggestions = suggestions.filter((suggestion) => {
     const matchesType = filterType === "All" || suggestion.type === filterType;
     const matchesStatus = filterStatus === "All" || suggestion.status === filterStatus;
@@ -15930,9 +15935,9 @@ var applyFilters = function(suggestions) {
   });
   if (filteredSuggestions.length === 0) {
     displayNoSuggestionsMessage();
-    return;
+  } else {
+    displaySuggestions(filteredSuggestions);
   }
-  displaySuggestions(filteredSuggestions);
 };
 var displayNoSuggestionsMessage = function() {
   clearSuggestions();
@@ -15942,8 +15947,7 @@ var displayNoSuggestionsMessage = function() {
   suggestionContainer.appendChild(emptySuggestion);
 };
 var clearSuggestions = function() {
-  const suggestionContainer = document.getElementById("suggestions-list");
-  suggestionContainer.innerHTML = "";
+  document.getElementById("suggestions-list").innerHTML = "";
 };
 var displaySuggestions = function(suggestions) {
   clearSuggestions();
@@ -15955,8 +15959,7 @@ var displaySuggestions = function(suggestions) {
 };
 var createSuggestionCard = function(suggestion) {
   const card = document.createElement("div");
-  card.classList.add("suggestion-card");
-  card.classList.add(suggestion.status.toLowerCase());
+  card.classList.add("suggestion-card", suggestion.status.toLowerCase());
   const cardHeader = createCardHeader(suggestion);
   const cardBody = createCardBody(suggestion);
   card.appendChild(cardHeader);
@@ -15970,8 +15973,11 @@ var createCardHeader = function(suggestion) {
   title.classList.add("title-text");
   title.textContent = suggestion.suggestion;
   cardHeader.appendChild(title);
-  const expandButtonContainer = document.createElement("div");
-  expandButtonContainer.classList.add("expand-button-container");
+  const expandButton = createExpandButton();
+  cardHeader.appendChild(expandButton);
+  return cardHeader;
+};
+var createExpandButton = function() {
   const expandButton = document.createElement("button");
   expandButton.textContent = "More Info";
   expandButton.classList.add("expand-button");
@@ -15980,9 +15986,7 @@ var createCardHeader = function(suggestion) {
     cardBody.classList.toggle("expanded");
     expandButton.textContent = cardBody.classList.contains("expanded") ? "Less Info" : "More Info";
   });
-  expandButtonContainer.appendChild(expandButton);
-  cardHeader.appendChild(expandButtonContainer);
-  return cardHeader;
+  return expandButton;
 };
 var createCardBody = function(suggestion) {
   const cardBody = document.createElement("div");
@@ -15990,26 +15994,41 @@ var createCardBody = function(suggestion) {
   const timeItem = createCardItem("fa-clock", humanReadableTime(suggestion.time));
   const statusItem = createCardItem("fa-info", suggestion.status);
   const typeItem = createCardItem(getTypeIcon(suggestion.type), suggestion.type);
-  const resolutionItem = createCardItem("fa-comment-dots", suggestion.resolution, true);
+  const resolutionItem = createResolutionItem(suggestion.resolution);
   cardBody.appendChild(timeItem);
   cardBody.appendChild(statusItem);
   cardBody.appendChild(typeItem);
   cardBody.appendChild(resolutionItem);
   return cardBody;
 };
-var createCardItem = function(iconClass, textContent, isParagraph = false) {
+var createCardItem = function(iconClass, textContent) {
   const cardItem = document.createElement("div");
   cardItem.classList.add("card-item");
   const icon = document.createElement("i");
   icon.classList.add("icon", "fas", iconClass);
   cardItem.appendChild(icon);
-  const text = isParagraph ? document.createElement("p") : document.createElement("span");
-  if (isParagraph) {
-    text.classList.add("resolution-text");
-  }
+  const text = document.createElement("span");
   text.textContent = textContent;
   cardItem.appendChild(text);
   return cardItem;
+};
+var createResolutionItem = function(resolutionText) {
+  const resolutionItem = document.createElement("div");
+  resolutionItem.classList.add("resolution-item");
+  const resolutionHeader = document.createElement("div");
+  resolutionHeader.classList.add("resolution-item-header");
+  const icon = document.createElement("i");
+  icon.classList.add("icon", "fas", "fa-comment-dots");
+  resolutionHeader.appendChild(icon);
+  const headerText = document.createElement("span");
+  headerText.textContent = "Council's Statement:";
+  resolutionHeader.appendChild(headerText);
+  const text = document.createElement("p");
+  text.classList.add("resolution-text");
+  text.textContent = resolutionText;
+  resolutionItem.appendChild(resolutionHeader);
+  resolutionItem.appendChild(text);
+  return resolutionItem;
 };
 var getTypeIcon = function(type) {
   return type === "Dish" ? "fa-utensils" : "fa-question";
@@ -16018,44 +16037,62 @@ var humanReadableTime = function(timestamp) {
   const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1e6);
   return date.toLocaleString();
 };
+var getInputValue = function(elementId) {
+  return document.getElementById(elementId).value;
+};
 var app9 = initializeApp(firebaseConfig);
 var db = getFirestore(app9);
-window.addEventListener("DOMContentLoaded", async () => {
-  await fetchSuggestions();
-});
+window.addEventListener("DOMContentLoaded", fetchSuggestions);
 window.fetchSuggestions = fetchSuggestions;
 
 // js/submission.js
 async function submitSuggestion() {
-  const suggestionType = document.getElementById("suggestion-type").value;
-  const suggestionText = document.getElementById("suggestion-text").value;
+  const suggestionType = getInputValue2("suggestion-type");
+  const suggestionText = getInputValue2("suggestion-text");
   if (!suggestionType || !suggestionText) {
     alert("Please fill in all fields");
     return;
   }
   try {
     const user = auth5.currentUser;
-    if (!user || !user.email.endsWith("@iisermohali.ac.in")) {
-      console.log(user.email);
+    if (!isValidUser(user)) {
       alert("You must be signed in with IISER GMail ID to submit a suggestion");
       return;
     }
-    await addDoc(collection(db2, "suggestions"), {
-      email: user.email,
-      resolution: "Waiting for next council meeting.",
-      status: "Processing",
-      suggestion: suggestionText,
-      time: Timestamp.now(),
-      type: suggestionType
-    });
+    await addSuggestionToDB(user.email, suggestionType, suggestionText);
     alert("Suggestion submitted successfully");
-    document.getElementById("suggestion-type").value = "";
-    document.getElementById("suggestion-text").value = "";
+    resetForm();
   } catch (error) {
-    console.error("Error adding document: ", error);
-    alert("Failed to submit suggestion: " + error.message);
+    handleSubmissionError(error);
   }
 }
+var getInputValue2 = function(elementId) {
+  return document.getElementById(elementId).value;
+};
+var isValidUser = function(user) {
+  return user && user.email.endsWith("@iisermohali.ac.in");
+};
+async function addSuggestionToDB(email, type, suggestion) {
+  await addDoc(collection(db2, "suggestions"), {
+    email,
+    resolution: "Waiting for next council meeting.",
+    status: "Processing",
+    suggestion,
+    time: Timestamp.now(),
+    type
+  });
+}
+var resetForm = function() {
+  setInputValue("suggestion-type", "");
+  setInputValue("suggestion-text", "");
+};
+var setInputValue = function(elementId, value) {
+  document.getElementById(elementId).value = value;
+};
+var handleSubmissionError = function(error) {
+  console.error("Error adding document: ", error);
+  alert("Failed to submit suggestion: " + error.message);
+};
 var app11 = initializeApp(firebaseConfig);
 var auth5 = getAuth(app11);
 var db2 = getFirestore(app11);
