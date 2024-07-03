@@ -1,4 +1,4 @@
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from "./firebaseConfig.js";
 
@@ -6,10 +6,15 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
-export async function signInWithGoogle() {
+async function signInWithGoogle() {
     try {
         const result = await signInWithPopup(auth, googleProvider);
-        handleSignInSuccess();
+        if (result.user.email.endsWith("@iisermohali.ac.in")) {
+            handleSignInSuccess();
+        } else {
+            await signOut(auth);
+            alert('You must sign in with an IISER Mohali email address.');
+        }
     } catch (error) {
         handleSignInError(error);
     }
@@ -28,9 +33,16 @@ function handleSignInError(error) {
 
 function toggleElementVisibility(elementId, isVisible) {
     const element = document.getElementById(elementId);
-    if (element) {
-        element.classList.toggle('hidden', !isVisible);
-    }
+    element.classList.toggle('hidden', !isVisible);
 }
+
+window.addEventListener('load', async () => {
+    try {
+        await signOut(auth);
+        console.log('Cleared auth data on page reload.');
+    } catch (error) {
+        console.error('Error clearing auth data:', error);
+    }
+});
 
 window.signInWithGoogle = signInWithGoogle;

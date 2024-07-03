@@ -1,30 +1,36 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { firebaseConfig } from "./firebaseConfig.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { firebaseConfig } from './firebaseConfig.js';
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-export async function fetchSuggestions() {
-    try {
-        const suggestionsCol = collection(db, 'suggestions');
-        const suggestionSnapshot = await getDocs(suggestionsCol);
-        const suggestions = suggestionSnapshot.docs.map(doc => doc.data());
-        applyFilters(suggestions);
-    } catch (error) {
-        console.error('Error fetching suggestions:', error);
-    }
+document.addEventListener('DOMContentLoaded', function () {
+    onAuthStateChanged(auth, user => {
+        if (user) {
+            fetchSuggestions();
+        } else {
+            console.log('User not signed in');
+        }
+    });
+});
+
+async function fetchSuggestions() {
+    const suggestionsCol = collection(db, 'suggestions');
+    const suggestionSnapshot = await getDocs(suggestionsCol);
+    const suggestions = suggestionSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    applyFilters(suggestions);
 }
 
 function applyFilters(suggestions) {
-    const filterType = getInputValue('filter-type');
-    const filterStatus = getInputValue('filter-status');
-    const filteredSuggestions = suggestions.filter(suggestion => {
-        const matchesType = filterType === 'All' || suggestion.type === filterType;
-        const matchesStatus = filterStatus === 'All' || suggestion.status === filterStatus;
-        return matchesType && matchesStatus;
-    });
-
+    const filterType = getInputValue('filter-type') || 'All';
+    const filterStatus = getInputValue('filter-status') || 'All';
+    const filteredSuggestions = suggestions.filter(suggestion =>
+        (filterType === 'All' || suggestion.type === filterType) &&
+        (filterStatus === 'All' || suggestion.status === filterStatus)
+    );
     if (filteredSuggestions.length === 0) {
         displayNoSuggestionsMessage();
     } else {
@@ -57,6 +63,7 @@ function displaySuggestions(suggestions) {
 function createSuggestionCard(suggestion) {
     const card = document.createElement('div');
     card.classList.add('suggestion-card', suggestion.status.toLowerCase());
+    card.setAttribute('data-id', suggestion.id);
 
     const cardHeader = createCardHeader(suggestion);
     const cardBody = createCardBody(suggestion);
@@ -74,12 +81,39 @@ function createCardHeader(suggestion) {
     const title = document.createElement('p');
     title.classList.add('title-text');
     title.textContent = suggestion.suggestion;
+    title.style.textAlign = 'left';
     cardHeader.appendChild(title);
+
+    const voteSection = document.createElement('div');
+    voteSection.className = 'vote-section';
+    const upvoteButton = createVoteButton('upvote', 'fas fa-thumbs-up', () => updateVotes(suggestion.id, true), suggestion.upvotedBy);
+    const downvoteButton = createVoteButton('downvote', 'fas fa-thumbs-down', () => updateVotes(suggestion.id, false), suggestion.downvotedBy);
+    const voteCount = document.createElement('span');
+    voteCount.className = 'vote-count';
+    voteCount.textContent = `Votes: ${suggestion.votes || 0}`;
+
+    voteSection.append(upvoteButton, voteCount, downvoteButton);
+    cardHeader.appendChild(voteSection);
 
     const expandButton = createExpandButton();
     cardHeader.appendChild(expandButton);
 
     return cardHeader;
+}
+
+function createVoteButton(className, iconClass, onClick, voteList) {
+    const button = document.createElement('button');
+    button.className = `vote-button ${className}`;
+    button.innerHTML = `<i class="${iconClass}"></i>`;
+    button.onclick = onClick;
+
+    const suggestionId = button.closest('.suggestion-card') ? button.closest('.suggestion-card').getAttribute('data-id') : null;
+
+    if (auth.currentUser && voteList.includes(auth.currentUser.email)) {
+        button.disabled = true;
+    }
+
+    return button;
 }
 
 function createExpandButton() {
@@ -89,6 +123,7 @@ function createExpandButton() {
     expandButton.addEventListener('click', event => {
         const cardBody = event.target.closest('.suggestion-card').querySelector('.card-body');
         cardBody.classList.toggle('expanded');
+        cardBody.style.display = cardBody.classList.contains('expanded') ? 'block' : 'none';
         expandButton.textContent = cardBody.classList.contains('expanded') ? 'Less Info' : 'More Info';
     });
     return expandButton;
@@ -160,9 +195,43 @@ function humanReadableTime(timestamp) {
     return date.toLocaleString();
 }
 
+async function updateVotes(id, isUpvote) {
+    const suggestionRef = doc(db, "suggestions", id);
+    try {
+        const suggestionDoc = await getDoc(suggestionRef);
+        if (!suggestionDoc.exists()) {
+            console.log("No such suggestion!");
+            return;
+        }
+        const data = suggestionDoc.data();
+        const increment = isUpvote ? 1 : -1;
+        const updatedVotes = data.votes + increment;
+        await updateDoc(suggestionRef, {
+            votes: updatedVotes,
+            upvotedBy: addOrRemove(data.upvotedBy, auth.currentUser.email, isUpvote),
+            downvotedBy: addOrRemove(data.downvotedBy, auth.currentUser.email, !isUpvote)
+        });
+
+        document.querySelector(`[data-id="${id}"] .vote-count`).textContent = `Votes: ${updatedVotes}`;
+        const buttonClass = isUpvote ? 'upvote' : 'downvote';
+        document.querySelector(`[data-id="${id}"] .${buttonClass}`).disabled = true;
+
+    } catch (error) {
+        console.error('Error updating votes:', error);
+    }
+}
+
+function addOrRemove(list, email, add) {
+    const index = list.indexOf(email);
+    if (add && index === -1) list.push(email);
+    else if (!add && index !== -1) list.splice(index, 1);
+    return list;
+}
+
 function getInputValue(elementId) {
     return document.getElementById(elementId).value;
 }
 
 window.addEventListener('DOMContentLoaded', fetchSuggestions);
 window.fetchSuggestions = fetchSuggestions;
+window.updateVotes = updateVotes;

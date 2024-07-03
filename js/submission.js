@@ -16,38 +16,38 @@ async function submitSuggestion() {
         return;
     }
 
-    try {
-        const user = auth.currentUser;
-        if (!isValidUser(user)) {
-            alert('You must be signed in with IISER GMail ID to submit a suggestion');
-            return;
-        }
+    const user = auth.currentUser;
+    if (!user) {
+        alert('You must be signed in with IISER GMail ID to submit a suggestion');
+        return;
+    }
 
+    try {
         await addSuggestionToDB(user.email, suggestionType, suggestionText);
         alert('Suggestion submitted successfully');
         resetForm();
     } catch (error) {
-        handleSubmissionError(error);
+        console.error('Error adding suggestion:', error);
+        alert('Failed to submit suggestion: ' + error.message);
     }
-}
-
-function getInputValue(elementId) {
-    return document.getElementById(elementId).value;
-}
-
-function isValidUser(user) {
-    return user && user.email.endsWith("@iisermohali.ac.in");
 }
 
 async function addSuggestionToDB(email, type, suggestion) {
     await addDoc(collection(db, 'suggestions'), {
         email,
-        resolution: "Waiting for next council meeting.",
-        status: "Processing",
-        suggestion,
-        time: Timestamp.now(),
         type,
+        suggestion,
+        resolution: 'Waiting for next council meeting.',
+        status: 'Processing',
+        time: Timestamp.now(),
+        votes: 1,
+        upvotedBy: [email],
+        downvotedBy: []
     });
+}
+
+function getInputValue(elementId) {
+    return document.getElementById(elementId).value;
 }
 
 function resetForm() {
@@ -57,11 +57,6 @@ function resetForm() {
 
 function setInputValue(elementId, value) {
     document.getElementById(elementId).value = value;
-}
-
-function handleSubmissionError(error) {
-    console.error('Error adding document: ', error);
-    alert('Failed to submit suggestion: ' + error.message);
 }
 
 window.submitSuggestion = submitSuggestion;

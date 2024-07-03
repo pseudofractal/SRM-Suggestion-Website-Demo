@@ -22,6 +22,7 @@ body {
 button {
     background-color: #eba0ac;
     color: #11111b;
+    margin: 5px;
 }
 
 button:focus {
@@ -70,7 +71,7 @@ button:hover {
 .card-body {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease-out;
+    transition: max-height 0.3s ease-out, display 0.3s ease-out;
     display: flex;
     flex-direction: column;
     color: #11111b;
@@ -78,7 +79,7 @@ button:hover {
 
 .card-body.expanded {
     max-height: 1000px;
-    overflow: auto;
+    display: flex;
 }
 
 .card-item {
@@ -140,6 +141,7 @@ button:hover {
     white-space: normal;
     overflow: auto;
     color: #11111b;
+    text-align: left;
 }
 
 .resolution-text {
@@ -157,24 +159,6 @@ button:hover {
     margin-right: 10px;
 }
 
-.resolution-text::-webkit-scrollbar {
-    height: 12px;
-}
-
-.resolution-text::-webkit-scrollbar-thumb {
-    background: #11111b;
-    border-radius: 6px;
-}
-
-.resolution-text::-webkit-scrollbar-thumb:hover {
-    background: #333333;
-}
-
-.resolution-text::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 6px;
-}
-
 @media (max-width: 600px) {
     .filter-container {
         flex-direction: column;
@@ -188,9 +172,61 @@ button:hover {
     .card-header {
         flex-direction: column;
     }
+}
 
-    .title-text {
-        white-space: normal;
-        overflow: visible;
-    }
+.vote-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vote-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0 10px;
+    font-size: 1.5rem;
+}
+
+.vote-button.upvote {
+    color: #007BFF;
+}
+
+.vote-button.downvote {
+    color: #FF4136;
+}
+
+.vote-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.vote-count {
+    margin: 0 15px;
+    font-size: 1.2rem;
+    color: #11111b;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-body {
+    display: none;
+}
+
+.expand-button {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+.expand-button:active {
+    background-color: #555;
 }

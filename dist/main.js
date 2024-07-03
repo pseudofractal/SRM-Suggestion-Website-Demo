@@ -2425,6 +2425,12 @@ var onIdTokenChanged = function(auth, nextOrObserver, error, completed) {
 var beforeAuthStateChanged = function(auth, callback, onAbort) {
   return getModularInstance(auth).beforeAuthStateChanged(callback, onAbort);
 };
+var onAuthStateChanged = function(auth, nextOrObserver, error, completed) {
+  return getModularInstance(auth).onAuthStateChanged(nextOrObserver, error, completed);
+};
+var signOut = function(auth) {
+  return getModularInstance(auth).signOut();
+};
 var startEnrollPhoneMfa = function(auth, request) {
   return _performApiRequest(auth, "POST", "/v2/accounts/mfaEnrollment:start", _addTidIfNecessary(auth, request));
 };
@@ -6082,7 +6088,12 @@ var firebaseConfig = {
 async function signInWithGoogle() {
   try {
     const result = await signInWithPopup(auth3, googleProvider);
-    handleSignInSuccess();
+    if (result.user.email.endsWith("@iisermohali.ac.in")) {
+      handleSignInSuccess();
+    } else {
+      await signOut(auth3);
+      alert("You must sign in with an IISER Mohali email address.");
+    }
   } catch (error) {
     handleSignInError(error);
   }
@@ -6098,13 +6109,19 @@ var handleSignInError = function(error) {
 };
 var toggleElementVisibility = function(elementId, isVisible) {
   const element = document.getElementById(elementId);
-  if (element) {
-    element.classList.toggle("hidden", !isVisible);
-  }
+  element.classList.toggle("hidden", !isVisible);
 };
 var app6 = initializeApp(firebaseConfig);
 var auth3 = getAuth(app6);
 var googleProvider = new GoogleAuthProvider;
+window.addEventListener("load", async () => {
+  try {
+    await signOut(auth3);
+    console.log("Cleared auth data on page reload.");
+  } catch (error) {
+    console.error("Error clearing auth data:", error);
+  }
+});
 window.signInWithGoogle = signInWithGoogle;
 
 // node_modules/@firebase/webchannel-wrapper/dist/bloom-blob/esm/bloom_blob_es2018.js
@@ -10965,6 +10982,23 @@ async function __PRIVATE_getEventManager(e) {
   const t = await __PRIVATE_ensureOnlineComponents(e), n = t.eventManager;
   return n.onListen = __PRIVATE_syncEngineListen.bind(null, t.syncEngine), n.onUnlisten = __PRIVATE_syncEngineUnlisten.bind(null, t.syncEngine), n.onFirstRemoteStoreListen = __PRIVATE_triggerRemoteStoreListen.bind(null, t.syncEngine), n.onLastRemoteStoreUnlisten = __PRIVATE_triggerRemoteStoreUnlisten.bind(null, t.syncEngine), n;
 }
+var __PRIVATE_firestoreClientGetDocumentViaSnapshotListener = function(e, t, n = {}) {
+  const r = new __PRIVATE_Deferred;
+  return e.asyncQueue.enqueueAndForget(async () => function __PRIVATE_readDocumentViaSnapshotListener(e2, t2, n2, r2, i) {
+    const s = new __PRIVATE_AsyncObserver({
+      next: (s2) => {
+        t2.enqueueAndForget(() => __PRIVATE_eventManagerUnlisten(e2, o));
+        const _ = s2.docs.has(n2);
+        !_ && s2.fromCache ? i.reject(new FirestoreError(C.UNAVAILABLE, "Failed to get document because the client is offline.")) : _ && s2.fromCache && r2 && r2.source === "server" ? i.reject(new FirestoreError(C.UNAVAILABLE, 'Failed to get document from server. (However, this document does exist in the local cache. Run again without setting source to "server" to retrieve the cached document.)')) : i.resolve(s2);
+      },
+      error: (e3) => i.reject(e3)
+    }), o = new __PRIVATE_QueryListener(__PRIVATE_newQueryForPath(n2.path), s, {
+      includeMetadataChanges: true,
+      ra: true
+    });
+    return __PRIVATE_eventManagerListen(e2, o);
+  }(await __PRIVATE_getEventManager(e), e.asyncQueue, t, n, r)), r.promise;
+};
 var __PRIVATE_firestoreClientGetDocumentsViaSnapshotListener = function(e, t, n = {}) {
   const r = new __PRIVATE_Deferred;
   return e.asyncQueue.enqueueAndForget(async () => function __PRIVATE_executeQueryViaSnapshotListener(e2, t2, n2, r2, i) {
@@ -11139,6 +11173,47 @@ var __PRIVATE_parseSetData = function(e, t, n, r, i, s = {}) {
     a = null, u = o.fieldTransforms;
   return new ParsedSetData(new ObjectValue(_), a, u);
 };
+var __PRIVATE_parseUpdateData = function(e, t, n, r) {
+  const i = e.Fu(1, t, n);
+  __PRIVATE_validatePlainObject("Data must be an object, but it was:", i, r);
+  const s = [], o = ObjectValue.empty();
+  forEach(r, (e2, r2) => {
+    const _2 = __PRIVATE_fieldPathFromDotSeparatedString(t, e2, n);
+    r2 = getModularInstance(r2);
+    const a = i.Su(_2);
+    if (r2 instanceof __PRIVATE_DeleteFieldValueImpl)
+      s.push(_2);
+    else {
+      const e3 = __PRIVATE_parseData(r2, a);
+      e3 != null && (s.push(_2), o.set(_2, e3));
+    }
+  });
+  const _ = new FieldMask(s);
+  return new ParsedUpdateData(o, _, i.fieldTransforms);
+};
+var __PRIVATE_parseUpdateVarargs = function(e, t, n, r, i, s) {
+  const o = e.Fu(1, t, n), _ = [__PRIVATE_fieldPathFromArgument$1(t, r, n)], a = [i];
+  if (s.length % 2 != 0)
+    throw new FirestoreError(C.INVALID_ARGUMENT, `Function ${t}() needs to be called with an even number of arguments that alternate between field names and values.`);
+  for (let e2 = 0;e2 < s.length; e2 += 2)
+    _.push(__PRIVATE_fieldPathFromArgument$1(t, s[e2])), a.push(s[e2 + 1]);
+  const u = [], c = ObjectValue.empty();
+  for (let e2 = _.length - 1;e2 >= 0; --e2)
+    if (!__PRIVATE_fieldMaskContains(u, _[e2])) {
+      const t2 = _[e2];
+      let n2 = a[e2];
+      n2 = getModularInstance(n2);
+      const r2 = o.Su(t2);
+      if (n2 instanceof __PRIVATE_DeleteFieldValueImpl)
+        u.push(t2);
+      else {
+        const e3 = __PRIVATE_parseData(n2, r2);
+        e3 != null && (u.push(t2), c.set(t2, e3));
+      }
+    }
+  const l = new FieldMask(u);
+  return new ParsedUpdateData(c, l, o.fieldTransforms);
+};
 var __PRIVATE_parseData = function(e, t) {
   if (__PRIVATE_looksLikeJsonObject(e = getModularInstance(e)))
     return __PRIVATE_validatePlainObject("Unsupported field value:", t, e), __PRIVATE_parseObject(e, t);
@@ -11293,10 +11368,22 @@ var __PRIVATE_resultChangeType = function(e) {
       return fail();
   }
 };
+var getDoc = function(e) {
+  e = __PRIVATE_cast(e, DocumentReference);
+  const t = __PRIVATE_cast(e.firestore, Firestore);
+  return __PRIVATE_firestoreClientGetDocumentViaSnapshotListener(ensureFirestoreConfigured(t), e._key).then((n) => __PRIVATE_convertToDocSnapshot(t, e, n));
+};
 var getDocs = function(e) {
   e = __PRIVATE_cast(e, Query);
   const t = __PRIVATE_cast(e.firestore, Firestore), n = ensureFirestoreConfigured(t), r = new __PRIVATE_ExpUserDataWriter(t);
   return __PRIVATE_validateHasExplicitOrderByForLimitToLast(e._query), __PRIVATE_firestoreClientGetDocumentsViaSnapshotListener(n, e._query).then((n2) => new QuerySnapshot(t, r, e, n2));
+};
+var updateDoc = function(e, t, n, ...r) {
+  e = __PRIVATE_cast(e, DocumentReference);
+  const i = __PRIVATE_cast(e.firestore, Firestore), s = __PRIVATE_newUserDataReader(i);
+  let o;
+  o = typeof (t = getModularInstance(t)) == "string" || t instanceof FieldPath ? __PRIVATE_parseUpdateVarargs(s, "updateDoc", e._key, t, n, r) : __PRIVATE_parseUpdateData(s, "updateDoc", e._key, t);
+  return executeWrite(i, [o.toMutation(e._key, Precondition.exists(true))]);
 };
 var addDoc = function(e, t) {
   const n = __PRIVATE_cast(e.firestore, Firestore), r = doc(e), i = __PRIVATE_applyFirestoreDataConverter(e.converter, t);
@@ -11307,6 +11394,10 @@ var executeWrite = function(e, t) {
     const n = new __PRIVATE_Deferred;
     return e2.asyncQueue.enqueueAndForget(async () => __PRIVATE_syncEngineWrite(await __PRIVATE_getSyncEngine(e2), t2, n)), n.promise;
   }(ensureFirestoreConfigured(e), t);
+};
+var __PRIVATE_convertToDocSnapshot = function(e, t, n) {
+  const r = n.docs.get(t._key), i = new __PRIVATE_ExpUserDataWriter(e);
+  return new DocumentSnapshot(e, i, t._key, r, new SnapshotMetadata(n.hasPendingWrites, n.fromCache), t.converter);
 };
 var S = "@firebase/firestore";
 
@@ -15621,6 +15712,16 @@ class ParsedSetData {
     return this.fieldMask !== null ? new __PRIVATE_PatchMutation(e, this.data, this.fieldMask, t, this.fieldTransforms) : new __PRIVATE_SetMutation(e, this.data, t, this.fieldTransforms);
   }
 }
+
+class ParsedUpdateData {
+  constructor(e, t, n) {
+    this.data = e, this.fieldMask = t, this.fieldTransforms = n;
+  }
+  toMutation(e, t) {
+    return new __PRIVATE_PatchMutation(e, this.data, this.fieldMask, t, this.fieldTransforms);
+  }
+}
+
 class __PRIVATE_ParseContextImpl {
   constructor(e, t, n, r, i, s) {
     this.settings = e, this.databaseId = t, this.serializer = n, this.ignoreUndefinedProperties = r, i === undefined && this.mu(), this.fieldTransforms = i || [], this.fieldMask = s || [];
@@ -15688,6 +15789,17 @@ class __PRIVATE_UserDataReader {
       yu: false,
       Cu: r
     }, this.databaseId, this.serializer, this.ignoreUndefinedProperties);
+  }
+}
+
+class __PRIVATE_DeleteFieldValueImpl extends FieldValue {
+  _toFieldTransform(e) {
+    if (e.fu !== 2)
+      throw e.fu === 1 ? e.Du(`${this._methodName}() can only appear at the top level of your update data`) : e.Du(`${this._methodName}() cannot be used with set() unless you pass {merge:true}`);
+    return e.fieldMask.push(e.path), null;
+  }
+  isEqual(e) {
+    return e instanceof __PRIVATE_DeleteFieldValueImpl;
   }
 }
 var be = new RegExp("[~\\*/\\[\\]]");
@@ -15916,23 +16028,15 @@ var Ce = new WeakMap;
 })();
 // js/suggestions.js
 async function fetchSuggestions() {
-  try {
-    const suggestionsCol = collection(db, "suggestions");
-    const suggestionSnapshot = await getDocs(suggestionsCol);
-    const suggestions = suggestionSnapshot.docs.map((doc2) => doc2.data());
-    applyFilters(suggestions);
-  } catch (error) {
-    console.error("Error fetching suggestions:", error);
-  }
+  const suggestionsCol = collection(db, "suggestions");
+  const suggestionSnapshot = await getDocs(suggestionsCol);
+  const suggestions = suggestionSnapshot.docs.map((doc2) => ({ id: doc2.id, ...doc2.data() }));
+  applyFilters(suggestions);
 }
 var applyFilters = function(suggestions) {
-  const filterType = getInputValue("filter-type");
-  const filterStatus = getInputValue("filter-status");
-  const filteredSuggestions = suggestions.filter((suggestion) => {
-    const matchesType = filterType === "All" || suggestion.type === filterType;
-    const matchesStatus = filterStatus === "All" || suggestion.status === filterStatus;
-    return matchesType && matchesStatus;
-  });
+  const filterType = getInputValue("filter-type") || "All";
+  const filterStatus = getInputValue("filter-status") || "All";
+  const filteredSuggestions = suggestions.filter((suggestion) => (filterType === "All" || suggestion.type === filterType) && (filterStatus === "All" || suggestion.status === filterStatus));
   if (filteredSuggestions.length === 0) {
     displayNoSuggestionsMessage();
   } else {
@@ -15961,6 +16065,7 @@ var displaySuggestions = function(suggestions) {
 var createSuggestionCard = function(suggestion) {
   const card = document.createElement("div");
   card.classList.add("suggestion-card", suggestion.status.toLowerCase());
+  card.setAttribute("data-id", suggestion.id);
   const cardHeader = createCardHeader(suggestion);
   const cardBody = createCardBody(suggestion);
   card.appendChild(cardHeader);
@@ -15973,10 +16078,31 @@ var createCardHeader = function(suggestion) {
   const title = document.createElement("p");
   title.classList.add("title-text");
   title.textContent = suggestion.suggestion;
+  title.style.textAlign = "left";
   cardHeader.appendChild(title);
+  const voteSection = document.createElement("div");
+  voteSection.className = "vote-section";
+  const upvoteButton = createVoteButton("upvote", "fas fa-thumbs-up", () => updateVotes(suggestion.id, true), suggestion.upvotedBy);
+  const downvoteButton = createVoteButton("downvote", "fas fa-thumbs-down", () => updateVotes(suggestion.id, false), suggestion.downvotedBy);
+  const voteCount = document.createElement("span");
+  voteCount.className = "vote-count";
+  voteCount.textContent = `Votes: ${suggestion.votes || 0}`;
+  voteSection.append(upvoteButton, voteCount, downvoteButton);
+  cardHeader.appendChild(voteSection);
   const expandButton = createExpandButton();
   cardHeader.appendChild(expandButton);
   return cardHeader;
+};
+var createVoteButton = function(className, iconClass, onClick, voteList) {
+  const button = document.createElement("button");
+  button.className = `vote-button ${className}`;
+  button.innerHTML = `<i class="${iconClass}"></i>`;
+  button.onclick = onClick;
+  const suggestionId = button.closest(".suggestion-card") ? button.closest(".suggestion-card").getAttribute("data-id") : null;
+  if (auth5.currentUser && voteList.includes(auth5.currentUser.email)) {
+    button.disabled = true;
+  }
+  return button;
 };
 var createExpandButton = function() {
   const expandButton = document.createElement("button");
@@ -15985,6 +16111,7 @@ var createExpandButton = function() {
   expandButton.addEventListener("click", (event) => {
     const cardBody = event.target.closest(".suggestion-card").querySelector(".card-body");
     cardBody.classList.toggle("expanded");
+    cardBody.style.display = cardBody.classList.contains("expanded") ? "block" : "none";
     expandButton.textContent = cardBody.classList.contains("expanded") ? "Less Info" : "More Info";
   });
   return expandButton;
@@ -16038,13 +16165,55 @@ var humanReadableTime = function(timestamp) {
   const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1e6);
   return date.toLocaleString();
 };
+async function updateVotes(id, isUpvote) {
+  const suggestionRef = doc(db, "suggestions", id);
+  try {
+    const suggestionDoc = await getDoc(suggestionRef);
+    if (!suggestionDoc.exists()) {
+      console.log("No such suggestion!");
+      return;
+    }
+    const data = suggestionDoc.data();
+    const increment = isUpvote ? 1 : -1;
+    const updatedVotes = data.votes + increment;
+    await updateDoc(suggestionRef, {
+      votes: updatedVotes,
+      upvotedBy: addOrRemove(data.upvotedBy, auth5.currentUser.email, isUpvote),
+      downvotedBy: addOrRemove(data.downvotedBy, auth5.currentUser.email, !isUpvote)
+    });
+    document.querySelector(`[data-id="${id}"] .vote-count`).textContent = `Votes: ${updatedVotes}`;
+    const buttonClass = isUpvote ? "upvote" : "downvote";
+    document.querySelector(`[data-id="${id}"] .${buttonClass}`).disabled = true;
+  } catch (error) {
+    console.error("Error updating votes:", error);
+  }
+}
+var addOrRemove = function(list, email, add) {
+  const index = list.indexOf(email);
+  if (add && index === -1)
+    list.push(email);
+  else if (!add && index !== -1)
+    list.splice(index, 1);
+  return list;
+};
 var getInputValue = function(elementId) {
   return document.getElementById(elementId).value;
 };
 var app9 = initializeApp(firebaseConfig);
 var db = getFirestore(app9);
+var auth5 = getAuth(app9);
+document.addEventListener("DOMContentLoaded", function() {
+  onAuthStateChanged(auth5, (user) => {
+    if (user) {
+      fetchSuggestions();
+    } else {
+      console.log("User not signed in");
+    }
+  });
+});
 window.addEventListener("DOMContentLoaded", fetchSuggestions);
 window.fetchSuggestions = fetchSuggestions;
+window.updateVotes = updateVotes;
 
 // js/submission.js
 async function submitSuggestion() {
@@ -16054,35 +16223,36 @@ async function submitSuggestion() {
     alert("Please fill in all fields");
     return;
   }
+  const user = auth7.currentUser;
+  if (!user) {
+    alert("You must be signed in with IISER GMail ID to submit a suggestion");
+    return;
+  }
   try {
-    const user = auth5.currentUser;
-    if (!isValidUser(user)) {
-      alert("You must be signed in with IISER GMail ID to submit a suggestion");
-      return;
-    }
     await addSuggestionToDB(user.email, suggestionType, suggestionText);
     alert("Suggestion submitted successfully");
     resetForm();
   } catch (error) {
-    handleSubmissionError(error);
+    console.error("Error adding suggestion:", error);
+    alert("Failed to submit suggestion: " + error.message);
   }
+}
+async function addSuggestionToDB(email, type, suggestion) {
+  await addDoc(collection(db2, "suggestions"), {
+    email,
+    type,
+    suggestion,
+    resolution: "Waiting for next council meeting.",
+    status: "Processing",
+    time: Timestamp.now(),
+    votes: 1,
+    upvotedBy: [email],
+    downvotedBy: []
+  });
 }
 var getInputValue2 = function(elementId) {
   return document.getElementById(elementId).value;
 };
-var isValidUser = function(user) {
-  return user && user.email.endsWith("@iisermohali.ac.in");
-};
-async function addSuggestionToDB(email, type, suggestion) {
-  await addDoc(collection(db2, "suggestions"), {
-    email,
-    resolution: "Waiting for next council meeting.",
-    status: "Processing",
-    suggestion,
-    time: Timestamp.now(),
-    type
-  });
-}
 var resetForm = function() {
   setInputValue("suggestion-type", "");
   setInputValue("suggestion-text", "");
@@ -16090,11 +16260,7 @@ var resetForm = function() {
 var setInputValue = function(elementId, value) {
   document.getElementById(elementId).value = value;
 };
-var handleSubmissionError = function(error) {
-  console.error("Error adding document: ", error);
-  alert("Failed to submit suggestion: " + error.message);
-};
 var app11 = initializeApp(firebaseConfig);
-var auth5 = getAuth(app11);
+var auth7 = getAuth(app11);
 var db2 = getFirestore(app11);
 window.submitSuggestion = submitSuggestion;
