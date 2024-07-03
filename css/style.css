@@ -129,7 +129,7 @@ button:hover {
     text-overflow: ellipsis;
     max-height: 1000px;
     display: -webkit-box;
-    -webkit-line-clamp: 10;
+    -webkit-line-clamp: 200;
     -webkit-box-orient: vertical;
     color: #11111b;
 }

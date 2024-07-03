@@ -15951,6 +15951,7 @@ var clearSuggestions = function() {
 };
 var displaySuggestions = function(suggestions) {
   clearSuggestions();
+  suggestions.sort((a, b2) => b2.time.seconds - a.time.seconds);
   const suggestionContainer = document.getElementById("suggestions-list");
   suggestions.forEach((suggestion) => {
     const card = createSuggestionCard(suggestion);

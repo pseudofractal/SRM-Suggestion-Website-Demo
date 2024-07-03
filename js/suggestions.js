@@ -46,6 +46,7 @@ function clearSuggestions() {
 
 function displaySuggestions(suggestions) {
     clearSuggestions();
+    suggestions.sort((a, b) => b.time.seconds - a.time.seconds);
     const suggestionContainer = document.getElementById('suggestions-list');
     suggestions.forEach(suggestion => {
         const card = createSuggestionCard(suggestion);
