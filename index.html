@@ -6,51 +6,73 @@
     <title>SRM Suggestions</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <script src="dist/main.js"></script>
+    <script src="dist/main.js" defer></script>
 </head>
 <body>
-    <nav class="container-fluid">
-        <ul>
-            <li><strong>SRM Suggestions</strong></li>
-        </ul>
-        <ul>
-            <li id="submit-suggestion-btn" class="hidden"><a href="#submit-suggestion" role="button">Suggestion Form</a></li>
-            <li id="signin-btn"><button onclick="signInWithGoogle()" aria-label="Sign in with Google">Sign In with Google</button></li>
-            <li id="signout-btn" class="hidden"><button onclick="signOutUser()" aria-label="Sign out">Sign Out</button></li>
-        </ul>
-    </nav>
+<nav class="container-fluid">
+    <ul>
+        <li><strong>SRM Suggestions</strong></li>
+    </ul>
+    <ul>
+        <li id="submit-suggestion-btn" class="hidden"><a href="#submit-suggestion" role="button">Suggestion Form</a></li>
+        <li id="signin-btn"><button onclick="signInWithGoogle()" aria-label="Sign in with Google">Sign In with Google</button></li>
+    </ul>
+</nav>
 
-    <main class="container">
-        <section>
-            <hgroup>
-                <h2>Suggestion List</h2>
-                <h3>A time sorted list of all the suggestions SRMC has received.</h3>
-            </hgroup>
-            <p>Below is a list of all suggestions along with their submission times, current consideration status, and any comments regarding the consideration process from SRMC members.</p>
-        </section>
-        
-        <!-- Suggestion Form -->
-        <section id="submit-suggestion">
-            <hgroup>
-                <h2>Submit a Suggestion</h2>
-            </hgroup>
-            <form id="suggestion-form">
-                <label for="suggestion-type">Type</label>
-                <select id="suggestion-type" name="type" required>
-                    <option value="General">General</option>
-                    <option value="Dish">Dish</option>
-                </select>
-                <label for="suggestion-text">Suggestion</label>
-                <textarea id="suggestion-text" name="suggestion" required></textarea>
-                <button type="submit" role="button">Submit</button>
-            </form>
-        </section>
-    </main>
+<main class="container">
+    <section>
+        <hgroup>
+            <h2>Suggestion List</h2>
+            <h3>A time sorted list of all the suggestions SRMC has received.</h3>
+        </hgroup>
+        <p>Below is a list of all suggestions along with their submission times, current consideration status, and any comments regarding the consideration process from SRMC members.</p>
+        <p>In order to submit a new suggestion, please login using your IISER Mohali mail account in top right corner.</p>
 
-    <footer class="container">
-        <h2>Contact Us</h2>
-        <p>For any queries, please contact us using the provided email address.</p>
-        <a href="mailto:studentmess@iisermohali.ac.in">studentmess@iisermohali.ac.in</a>
-    </footer>
+        <!-- Filter Menus -->
+        <div id="filters">
+            <label for="filter-type">Filter by Type</label>
+            <select id="filter-type" name="filter-type">
+                <option value="all">All</option>
+                <option value="Dish">Dish</option>
+                <option value="General">General</option>
+            </select>
+
+            <label for="filter-status">Filter by Status</label>
+            <select id="filter-status" name="filter-status">
+                <option value="all">All</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+                <option value="rejected">Rejected</option>
+            </select>
+
+            <button onclick="fetchSuggestions()">Apply Filters</button>
+        </div>
+    </section>
+
+    <section id="suggestions-list">
+        <!-- Suggestions will be dynamically added here -->
+    </section>
+
+    <!-- Suggestion Form -->
+    <section id="submit-suggestion" class="hidden">
+        <hgroup>
+            <h2>Submit a Suggestion</h2>
+        </hgroup>
+        <label for="suggestion-type">Type</label>
+        <select id="suggestion-type" name="type" required>
+            <option value="General">General</option>
+            <option value="Dish">Dish</option>
+        </select>
+        <label for="suggestion-text">Suggestion</label>
+        <textarea id="suggestion-text" name="suggestion" required></textarea>
+        <button onclick="submitSuggestion(); fetchSuggestions();">Submit</button>
+    </section>
+</main>
+
+<footer class="container">
+    <h2>Contact Us</h2>
+    <p>For any queries, please contact us using the provided email address.</p>
+    <a href="mailto:studentmess@iisermohali.ac.in">studentmess@iisermohali.ac.in</a>
+</footer>
 </body>
 </html>

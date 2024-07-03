@@ -1,35 +1,47 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
-
-// Firebase configuration and initialization
-const firebaseConfig = {
-    apiKey: "AIzaSyDllOEaNJTcldiOZR6DwNL-VnbbCmDtXB4",
-    authDomain: "srm-web-app.firebaseapp.com",
-    projectId: "srm-web-app",
-    storageBucket: "srm-web-app.appspot.com",
-    messagingSenderId: "854722873993",
-    appId: "1:854722873993:web:2d5ba66678f63b81fbd458",
-    measurementId: "G-GR0RCESHZZ"
-};
+import { firebaseConfig } from "./firebaseConfig.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+let allSuggestions = [];
 
 export async function fetchSuggestions() {
     const suggestionsCol = collection(db, 'suggestions');
     try {
         const suggestionSnapshot = await getDocs(suggestionsCol);
-        const suggestionList = suggestionSnapshot.docs.map(doc => doc.data());
-        displaySuggestions(suggestionList);
+        allSuggestions = suggestionSnapshot.docs.map(doc => doc.data());
+        applyFilters();
     } catch (error) {
         console.error('Error fetching suggestions:', error);
     }
 }
 
+function applyFilters() {
+    const filterType = document.getElementById('filter-type').value;
+    const filterStatus = document.getElementById('filter-status').value;
+
+    const filteredSuggestions = allSuggestions.filter(suggestion => {
+        const matchesType = filterType === 'all' || suggestion.type === filterType;
+        const matchesStatus = filterStatus === 'all' || suggestion.status === filterStatus;
+        return matchesType && matchesStatus;
+    });
+    displaySuggestions(filteredSuggestions);
+    if (filterType !== 'all' && filterStatus !== 'all') {
+
+    }
+}
+
+function clearSuggestions() {
+    const suggestionContainer = document.getElementById('suggestions-list');
+    suggestionContainer.innerHTML = '';
+}
+
 function displaySuggestions(suggestions) {
-    const suggestionContainer = document.querySelector('main > section');
+    clearSuggestions();
+    const suggestionContainer = document.getElementById('suggestions-list');
     suggestions.forEach(suggestion => {
-        console.log(suggestion);
         const card = document.createElement('div');
         card.classList.add('suggestion-card');
 
@@ -62,14 +74,14 @@ function displaySuggestions(suggestions) {
         statusText.textContent = suggestion.status;
         statusItem.appendChild(statusText);
 
-        if (suggestion.status === 'processing') {
+        if (suggestion.status === 'Processing') {
             card.classList.add('processing');
-        } else if (suggestion.status === 'completed') {
+        } else if (suggestion.status === 'Completed') {
             card.classList.add('completed');
-        } else if (suggestion.status === 'rejected') {
+        } else if (suggestion.status === 'Rejected') {
             card.classList.add('rejected');
         }
-        
+
         const typeIcon = document.createElement('i');
         if (suggestion.type === 'Dish') {
             typeIcon.classList.add('icon', 'fas', 'fa-utensils');
@@ -98,9 +110,13 @@ function displaySuggestions(suggestions) {
     });
 }
 
-window.addEventListener('DOMContentLoaded', fetchSuggestions);
+window.addEventListener('DOMContentLoaded', () => {
+    fetchSuggestions();
+});
 
 function humanReadableTime(timestamp) {
     const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
     return date.toLocaleString();
 }
+
+window.fetchSuggestions = fetchSuggestions;

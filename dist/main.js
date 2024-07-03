@@ -2430,12 +2430,6 @@ var onIdTokenChanged = function(auth, nextOrObserver, error, completed) {
 var beforeAuthStateChanged = function(auth, callback, onAbort) {
   return getModularInstance(auth).beforeAuthStateChanged(callback, onAbort);
 };
-var onAuthStateChanged = function(auth, nextOrObserver, error, completed) {
-  return getModularInstance(auth).onAuthStateChanged(nextOrObserver, error, completed);
-};
-var signOut = function(auth) {
-  return getModularInstance(auth).signOut();
-};
 var startEnrollPhoneMfa = function(auth, request) {
   return _performApiRequest(auth, "POST", "/v2/accounts/mfaEnrollment:start", _addTidIfNecessary(auth, request));
 };
@@ -6073,39 +6067,7 @@ _setExternalJSProvider({
   recaptchaEnterpriseScript: "https://www.google.com/recaptcha/enterprise.js?render="
 });
 registerAuth("Browser");
-// js/auth.js
-async function signInWithGoogle() {
-  try {
-    const result = await signInWithPopup(auth3, googleProvider);
-    console.log("User signed in");
-    const user = result.user;
-    updateUIOnSignIn(user);
-  } catch (error) {
-    console.error("Sign in failed:", error);
-    alert("Sign in failed: " + error.message);
-  }
-}
-async function signOutUser() {
-  try {
-    await signOut(auth3);
-    console.log("User signed out");
-    updateUIOnSignOut();
-  } catch (error) {
-    console.error("Sign out failed:", error);
-    alert("Sign out failed: " + error.message);
-  }
-}
-var updateUIOnSignIn = function(user) {
-  document.getElementById("signin-btn").classList.add("hidden");
-  document.getElementById("signout-btn").classList.remove("hidden");
-  document.getElementById("submit-suggestion-btn").classList.remove("hidden");
-};
-var updateUIOnSignOut = function() {
-  document.getElementById("signin-btn").classList.remove("hidden");
-  document.getElementById("signout-btn").classList.add("hidden");
-  document.getElementById("submit-suggestion-btn").classList.add("hidden");
-  console.log("UI updated for sign out.");
-};
+// js/firebaseConfig.js
 var firebaseConfig = {
   apiKey: "AIzaSyDllOEaNJTcldiOZR6DwNL-VnbbCmDtXB4",
   authDomain: "srm-web-app.firebaseapp.com",
@@ -6115,13 +6077,27 @@ var firebaseConfig = {
   appId: "1:854722873993:web:2d5ba66678f63b81fbd458",
   measurementId: "G-GR0RCESHZZ"
 };
+
+// js/auth.js
+async function signInWithGoogle() {
+  try {
+    const result = await signInWithPopup(auth3, googleProvider);
+    updateUIOnSignIn();
+  } catch (error) {
+    console.error("Sign in failed:", error);
+    alert("Sign in failed: " + error.message);
+  }
+}
+var updateUIOnSignIn = function() {
+  document.getElementById("signin-btn").classList.add("hidden");
+  document.getElementById("submit-suggestion-btn").classList.remove("hidden");
+  document.getElementById("submit-suggestion").classList.remove("hidden");
+};
 var app6 = initializeApp(firebaseConfig);
 var auth3 = getAuth(app6);
 var googleProvider = new GoogleAuthProvider;
 window.signInWithGoogle = signInWithGoogle;
-window.signOutUser = signOutUser;
 window.updateUIOnSignIn = updateUIOnSignIn;
-window.updateUIOnSignOut = updateUIOnSignOut;
 
 // node_modules/@firebase/webchannel-wrapper/dist/bloom-blob/esm/bloom_blob_es2018.js
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
@@ -15935,16 +15911,32 @@ async function fetchSuggestions() {
   const suggestionsCol = collection(db, "suggestions");
   try {
     const suggestionSnapshot = await getDocs(suggestionsCol);
-    const suggestionList = suggestionSnapshot.docs.map((doc2) => doc2.data());
-    displaySuggestions(suggestionList);
+    allSuggestions = suggestionSnapshot.docs.map((doc2) => doc2.data());
+    applyFilters();
   } catch (error) {
     console.error("Error fetching suggestions:", error);
   }
 }
+var applyFilters = function() {
+  const filterType = document.getElementById("filter-type").value;
+  const filterStatus = document.getElementById("filter-status").value;
+  const filteredSuggestions = allSuggestions.filter((suggestion) => {
+    const matchesType = filterType === "all" || suggestion.type === filterType;
+    const matchesStatus = filterStatus === "all" || suggestion.status === filterStatus;
+    return matchesType && matchesStatus;
+  });
+  displaySuggestions(filteredSuggestions);
+  if (filterType !== "all" && filterStatus !== "all") {
+  }
+};
+var clearSuggestions = function() {
+  const suggestionContainer = document.getElementById("suggestions-list");
+  suggestionContainer.innerHTML = "";
+};
 var displaySuggestions = function(suggestions) {
-  const suggestionContainer = document.querySelector("main > section");
+  clearSuggestions();
+  const suggestionContainer = document.getElementById("suggestions-list");
   suggestions.forEach((suggestion) => {
-    console.log(suggestion);
     const card = document.createElement("div");
     card.classList.add("suggestion-card");
     const cardHeader = document.createElement("div");
@@ -15972,11 +15964,11 @@ var displaySuggestions = function(suggestions) {
     const statusText = document.createElement("span");
     statusText.textContent = suggestion.status;
     statusItem.appendChild(statusText);
-    if (suggestion.status === "processing") {
+    if (suggestion.status === "Processing") {
       card.classList.add("processing");
-    } else if (suggestion.status === "completed") {
+    } else if (suggestion.status === "Completed") {
       card.classList.add("completed");
-    } else if (suggestion.status === "rejected") {
+    } else if (suggestion.status === "Rejected") {
       card.classList.add("rejected");
     }
     const typeIcon = document.createElement("i");
@@ -16007,84 +15999,45 @@ var humanReadableTime = function(timestamp) {
   const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1e6);
   return date.toLocaleString();
 };
-var firebaseConfig2 = {
-  apiKey: "AIzaSyDllOEaNJTcldiOZR6DwNL-VnbbCmDtXB4",
-  authDomain: "srm-web-app.firebaseapp.com",
-  projectId: "srm-web-app",
-  storageBucket: "srm-web-app.appspot.com",
-  messagingSenderId: "854722873993",
-  appId: "1:854722873993:web:2d5ba66678f63b81fbd458",
-  measurementId: "G-GR0RCESHZZ"
-};
-var app9 = initializeApp(firebaseConfig2);
+var app9 = initializeApp(firebaseConfig);
 var db = getFirestore(app9);
-window.addEventListener("DOMContentLoaded", fetchSuggestions);
+var allSuggestions = [];
+window.addEventListener("DOMContentLoaded", () => {
+  fetchSuggestions();
+});
+window.fetchSuggestions = fetchSuggestions;
 
 // js/submission.js
-async function handleFormSubmit(event) {
-  event.preventDefault();
-  console.log("Form submit event triggered");
-  const type = document.getElementById("suggestion-type").value;
-  const suggestion = document.getElementById("suggestion-text").value;
-  const user = auth5.currentUser;
-  console.log("Form data:", { type, suggestion });
-  console.log("Current user:", user);
-  if (user) {
-    try {
-      const docRef = await addDoc(collection(db2, "suggestions"), {
-        type,
-        suggestion,
-        email: user.email,
-        time: Timestamp.now(),
-        status: "processing",
-        resolution: ""
-      });
-      console.log("Document written with ID: ", docRef.id);
-      alert("Suggestion submitted successfully!");
-      document.getElementById("suggestion-form").reset();
-    } catch (e) {
-      console.error("Error adding document:", e);
-      alert("Error submitting suggestion: " + e.message);
+async function submitSuggestion() {
+  const suggestionType = document.getElementById("suggestion-type").value;
+  const suggestionText = document.getElementById("suggestion-text").value;
+  if (!suggestionType || !suggestionText) {
+    alert("Please fill in all fields");
+    return;
+  }
+  try {
+    const user = auth5.currentUser;
+    if (!user) {
+      alert("You must be signed in to submit a suggestion");
+      return;
     }
-  } else {
-    console.log("User not signed in");
-    alert("You must be signed in to submit a suggestion.");
+    await addDoc(collection(db2, "suggestions"), {
+      email: user.email,
+      resolution: "Waiting for next council meeting.",
+      status: "Processing",
+      suggestion: suggestionText,
+      time: Timestamp.now(),
+      type: suggestionType
+    });
+    alert("Suggestion submitted successfully");
+    document.getElementById("suggestion-type").value = "";
+    document.getElementById("suggestion-text").value = "";
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    alert("Failed to submit suggestion: " + error.message);
   }
 }
-var updateUIOnAuthStateChange = function(user) {
-  console.log("Auth state changed:", user);
-  const signInBtn = document.getElementById("signin-btn");
-  const signOutBtn = document.getElementById("signout-btn");
-  const submitSuggestionBtn = document.getElementById("submit-suggestion-btn");
-  if (user) {
-    signInBtn.classList.add("hidden");
-    signOutBtn.classList.remove("hidden");
-    submitSuggestionBtn.classList.remove("hidden");
-  } else {
-    signInBtn.classList.remove("hidden");
-    signOutBtn.classList.add("hidden");
-    submitSuggestionBtn.classList.add("hidden");
-  }
-};
-var db2 = getFirestore();
-var auth5 = getAuth();
-console.log("Firebase initialized from submission.js");
-document.getElementById("suggestion-form").addEventListener("submit", handleFormSubmit);
-console.log("Form submit handler attached");
-onAuthStateChanged(auth5, (user) => {
-  console.log("onAuthStateChanged triggered");
-  updateUIOnAuthStateChange(user);
-  if (!user) {
-    alert("Please sign in to submit a suggestion.");
-    window.location.href = "#signin-btn";
-  }
-});
-document.getElementById("suggestion-form").addEventListener("focus", (event) => {
-  console.log("Form focus event triggered");
-  const user = auth5.currentUser;
-  if (!user) {
-    alert("Please sign in to submit a suggestion.");
-    window.location.href = "#signin-btn";
-  }
-}, true);
-console.log("Form focus handler attached");
+var app11 = initializeApp(firebaseConfig);
+var auth5 = getAuth(app11);
+var db2 = getFirestore(app11);
+window.submitSuggestion = submitSuggestion;
