@@ -160,12 +160,17 @@ button:hover {
     overflow-wrap: break-word;
     width: 100%;
 }
-
+`
 .filter-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
+}
+
+.filter-container > div:last-child button {
+    margin-top: 15px;
+    padding-top: 10px;
 }
 
 .filter-container > div {

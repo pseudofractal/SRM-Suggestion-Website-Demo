@@ -270,4 +270,4 @@ function updateButtonState(id, data) {
 
 window.addEventListener('DOMContentLoaded', fetchSuggestions);
 window.fetchSuggestions = fetchSuggestions;
-window.updateVotes = updateVotes;s
+window.updateVotes = updateVotes;
