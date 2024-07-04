@@ -8,6 +8,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 async function submitSuggestion() {
+    console.log("Submitting Suggestion");
     const suggestionType = getInputValue('suggestion-type');
     const suggestionText = getInputValue('suggestion-text');
 
