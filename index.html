@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="dist/main.js" defer></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <nav class="container-fluid">
@@ -15,7 +16,14 @@
     </ul>
     <ul>
         <li id="submit-suggestion-btn" class="hidden"><a href="#submit-suggestion" role="button">Submit Suggestion</a></li>
-        <li id="signin-btn"><button onclick="signInWithGoogle()" aria-label="Sign in with Google">Sign In with Google</button></li>
+        <li id="signin-btn">
+            <button onclick="signInWithGoogle()" aria-label="Sign in with Google">
+                <i class="fab fa-google"></i> Sign In with Google
+            </button>
+        </li>
+        <li id="profile-container" class="hidden">
+            <img id="profile-pic" src="" alt="Profile Picture" class="profile-pic" onclick="signInWithGoogle()">
+        </li>
     </ul>
 </nav>
 

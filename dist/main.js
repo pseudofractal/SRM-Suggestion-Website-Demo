@@ -6089,7 +6089,7 @@ async function signInWithGoogle() {
   try {
     const result = await signInWithPopup(auth3, googleProvider);
     if (result.user.email.endsWith("@iisermohali.ac.in")) {
-      handleSignInSuccess();
+      handleSignInSuccess(result.user);
     } else {
       await signOut(auth3);
       alert("You must sign in with an IISER Mohali email address.");
@@ -6098,10 +6098,12 @@ async function signInWithGoogle() {
     handleSignInError(error);
   }
 }
-var handleSignInSuccess = function() {
+var handleSignInSuccess = function(user) {
   toggleElementVisibility("signin-btn", false);
   toggleElementVisibility("submit-suggestion-btn", true);
   toggleElementVisibility("submit-suggestion", true);
+  document.getElementById("profile-pic").src = user.photoURL;
+  toggleElementVisibility("profile-container", true);
 };
 var handleSignInError = function(error) {
   console.error("Sign in failed:", error);
@@ -6111,18 +6113,32 @@ var toggleElementVisibility = function(elementId, isVisible) {
   const element = document.getElementById(elementId);
   element.classList.toggle("hidden", !isVisible);
 };
+async function signOutUser() {
+  try {
+    await signOut(auth3);
+    window.location.reload();
+  } catch (error) {
+    console.error("Sign out failed:", error);
+    alert("Sign out failed: " + error.message);
+  }
+}
 var app6 = initializeApp(firebaseConfig);
 var auth3 = getAuth(app6);
 var googleProvider = new GoogleAuthProvider;
 window.addEventListener("load", async () => {
-  try {
-    await signOut(auth3);
-    console.log("Cleared auth data on page reload.");
-  } catch (error) {
-    console.error("Error clearing auth data:", error);
-  }
+  onAuthStateChanged(auth3, (user) => {
+    if (user && user.email.endsWith("@iisermohali.ac.in")) {
+      handleSignInSuccess(user);
+    } else {
+      toggleElementVisibility("signin-btn", true);
+      toggleElementVisibility("submit-suggestion-btn", false);
+      toggleElementVisibility("submit-suggestion", false);
+      toggleElementVisibility("profile-container", false);
+    }
+  });
 });
 window.signInWithGoogle = signInWithGoogle;
+window.signOutUser = signOutUser;
 
 // node_modules/@firebase/webchannel-wrapper/dist/bloom-blob/esm/bloom_blob_es2018.js
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};

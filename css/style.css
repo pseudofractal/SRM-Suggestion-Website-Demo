@@ -258,3 +258,10 @@ button:hover {
 .expand-button:active {
     background-color: #555;
 }
+
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+}

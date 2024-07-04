@@ -1,4 +1,4 @@
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from "./firebaseConfig.js";
 
@@ -10,7 +10,7 @@ async function signInWithGoogle() {
     try {
         const result = await signInWithPopup(auth, googleProvider);
         if (result.user.email.endsWith("@iisermohali.ac.in")) {
-            handleSignInSuccess();
+            handleSignInSuccess(result.user);
         } else {
             await signOut(auth);
             alert('You must sign in with an IISER Mohali email address.');
@@ -20,10 +20,12 @@ async function signInWithGoogle() {
     }
 }
 
-function handleSignInSuccess() {
+function handleSignInSuccess(user) {
     toggleElementVisibility('signin-btn', false);
     toggleElementVisibility('submit-suggestion-btn', true);
     toggleElementVisibility('submit-suggestion', true);
+    document.getElementById('profile-pic').src = user.photoURL;
+    toggleElementVisibility('profile-container', true);
 }
 
 function handleSignInError(error) {
@@ -36,13 +38,28 @@ function toggleElementVisibility(elementId, isVisible) {
     element.classList.toggle('hidden', !isVisible);
 }
 
-window.addEventListener('load', async () => {
+async function signOutUser() {
     try {
         await signOut(auth);
-        console.log('Cleared auth data on page reload.');
+        window.location.reload();
     } catch (error) {
-        console.error('Error clearing auth data:', error);
+        console.error('Sign out failed:', error);
+        alert('Sign out failed: ' + error.message);
     }
+}
+
+window.addEventListener('load', async () => {
+    onAuthStateChanged(auth, (user) => {
+        if (user && user.email.endsWith("@iisermohali.ac.in")) {
+            handleSignInSuccess(user);
+        } else {
+            toggleElementVisibility('signin-btn', true);
+            toggleElementVisibility('submit-suggestion-btn', false);
+            toggleElementVisibility('submit-suggestion', false);
+            toggleElementVisibility('profile-container', false);
+        }
+    });
 });
 
 window.signInWithGoogle = signInWithGoogle;
+window.signOutUser = signOutUser;
