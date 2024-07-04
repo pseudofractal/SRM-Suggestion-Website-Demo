@@ -227,6 +227,14 @@ button:hover {
     cursor: not-allowed;
 }
 
+.vote-button.upvote.active {
+    background-color: #1e66f5;
+}
+
+.vote-button.downvote.active {
+    background-color: #d20f39;
+}
+
 .vote-count {
     margin: 0 15px;
     font-size: 1.2rem;

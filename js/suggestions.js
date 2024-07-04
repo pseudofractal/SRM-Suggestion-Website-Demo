@@ -8,11 +8,11 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 document.addEventListener('DOMContentLoaded', function () {
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async user => {
         if (user) {
-            fetchSuggestions(user);
+            await fetchSuggestions(user);
         } else {
-            fetchSuggestions();
+            await fetchSuggestions();
             console.log('User not signed in');
         }
     });
@@ -91,13 +91,13 @@ function createCardHeader(suggestion, user) {
         const downvoteButton = createVoteButton('downvote', 'fas fa-thumbs-down', () => updateVotes(suggestion.id, false), suggestion.downvotedBy);
         const voteCount = document.createElement('span');
         voteCount.className = 'vote-count';
-        voteCount.textContent = `Votes: ${suggestion.votes || 0}`;
+        voteCount.textContent = `Votes: ${calculateVotes(suggestion)}`;
 
         voteSection.append(upvoteButton, voteCount, downvoteButton);
     } else {
         const voteCount = document.createElement('span');
         voteCount.className = 'vote-count';
-        voteCount.textContent = `Votes: ${suggestion.votes || 0}`;
+        voteCount.textContent = `Votes: ${calculateVotes(suggestion)}`;
 
         voteSection.appendChild(voteCount);
     }
@@ -116,7 +116,7 @@ function createVoteButton(className, iconClass, onClick, voteList) {
     button.onclick = onClick;
 
     if (auth.currentUser && voteList.includes(auth.currentUser.email)) {
-        button.disabled = true;
+        button.classList.add('active');
     }
 
     return button;
@@ -210,21 +210,37 @@ async function updateVotes(id, isUpvote) {
             return;
         }
         const data = suggestionDoc.data();
-        const increment = isUpvote ? 1 : -1;
-        const updatedVotes = data.votes + increment;
+        if (isUpvote) {
+            if (data.upvotedBy.includes(auth.currentUser.email)) {
+                data.upvotedBy = addOrRemove(data.upvotedBy, auth.currentUser.email, false);
+            } else {
+                data.upvotedBy = addOrRemove(data.upvotedBy, auth.currentUser.email, true);
+                data.downvotedBy = addOrRemove(data.downvotedBy, auth.currentUser.email, false);
+            }
+        } else {
+            if (data.downvotedBy.includes(auth.currentUser.email)) {
+                data.downvotedBy = addOrRemove(data.downvotedBy, auth.currentUser.email, false);
+            } else {
+                data.downvotedBy = addOrRemove(data.downvotedBy, auth.currentUser.email, true);
+                data.upvotedBy = addOrRemove(data.upvotedBy, auth.currentUser.email, false);
+            }
+        }
+        const updatedVotes = calculateVotes(data);
         await updateDoc(suggestionRef, {
-            votes: updatedVotes,
-            upvotedBy: addOrRemove(data.upvotedBy, auth.currentUser.email, isUpvote),
-            downvotedBy: addOrRemove(data.downvotedBy, auth.currentUser.email, !isUpvote)
+            upvotedBy: data.upvotedBy,
+            downvotedBy: data.downvotedBy
         });
 
         document.querySelector(`[data-id="${id}"] .vote-count`).textContent = `Votes: ${updatedVotes}`;
-        const buttonClass = isUpvote ? 'upvote' : 'downvote';
-        document.querySelector(`[data-id="${id}"] .${buttonClass}`).disabled = true;
+        updateButtonState(id, data);
 
     } catch (error) {
         console.error('Error updating votes:', error);
     }
+}
+
+function calculateVotes(suggestion) {
+    return suggestion.upvotedBy.length - suggestion.downvotedBy.length;
 }
 
 function addOrRemove(list, email, add) {
@@ -238,6 +254,20 @@ function getInputValue(elementId) {
     return document.getElementById(elementId).value;
 }
 
+function updateButtonState(id, data) {
+    const suggestionCard = document.querySelector(`[data-id="${id}"]`);
+    const upvoteButton = suggestionCard.querySelector('.vote-button.upvote');
+    const downvoteButton = suggestionCard.querySelector('.vote-button.downvote');
+
+    if (upvoteButton) {
+        upvoteButton.classList.toggle('active', data.upvotedBy.includes(auth.currentUser.email));
+    }
+
+    if (downvoteButton) {
+        downvoteButton.classList.toggle('active', data.downvotedBy.includes(auth.currentUser.email));
+    }
+}
+
 window.addEventListener('DOMContentLoaded', fetchSuggestions);
 window.fetchSuggestions = fetchSuggestions;
-window.updateVotes = updateVotes;
+window.updateVotes = updateVotes;s
