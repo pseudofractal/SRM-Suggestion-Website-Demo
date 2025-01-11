@@ -84,8 +84,16 @@ function createCardHeader(suggestion, user) {
     title.textContent = suggestion.suggestion;
     cardHeader.appendChild(title);
 
-    const voteSection = document.createElement('div');
-    voteSection.className = 'vote-section';
+    const voteBar = document.createElement('div');
+    voteBar.className = 'vote-bar';
+
+    const voteInfo = document.createElement('div');
+    voteInfo.className = 'vote-info';
+    const voteText  = document.createElement('span');
+    voteText.textContent = 'Votes:'
+    voteInfo.appendChild(voteText);
+
+
     if (user) {
         const upvoteButton = createVoteButton('upvote', 'fas fa-thumbs-up', () => updateVotes(suggestion.id, true), suggestion.upvotedBy);
         const downvoteButton = createVoteButton('downvote', 'fas fa-thumbs-down', () => updateVotes(suggestion.id, false), suggestion.downvotedBy);
